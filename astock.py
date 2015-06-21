@@ -57,7 +57,7 @@ def printStockData(name, todayStart, yesterdayEnd, current, highest, lowest):
 		increaseStr = colored(increaseStr, 'red')
 	else:
 		increaseStr = '0.00%'
-	# 计算现价在今日振幅中的百分点
+	# 计算现价在今日振幅中的百分比位置
 	if highest == lowest:
 		if current < yesterdayEnd:
 			percentStr = '0'
