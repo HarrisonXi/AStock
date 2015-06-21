@@ -17,17 +17,21 @@ def loadStockList():
 					stockList.append('sz' + stockNumber)
 				elif stockNumber.startswith('6'):
 					stockList.append('sh' + stockNumber)
+		elif stockNumber == 'sh':
+			stockList.append('sh000001')
+		elif stockNumber == 'sz':
+			stockList.append('sz399001')
 	if len(stockList) == 0:
 		return False
 	return True
 
-def requestData():
+def requestStockData():
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
 	print url
 
 if len(sys.argv) < 2:
-	print '使用方法: python astock.py 000001 sh603019 sz002024'
+	print('使用示例: python astock.py sh603019 sz002024\n自动补全：0字头股票代码脚本会自动补sz，6字头股票代码补sh\n特殊代码：sh-上证指数，sz-深证指数')
 elif not loadStockList():
-	print '没有有效的股票代码'
-else :
-	requestData()
+	print('没有有效的股票代码')
+else:
+	requestStockData()
