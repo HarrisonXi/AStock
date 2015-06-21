@@ -3,6 +3,7 @@ import sys
 import urllib2
 import re
 import time
+from termcolor import colored
 
 stockList = []
 timePattern = re.compile(r',(\d+:\d+:\d+),')
@@ -11,7 +12,7 @@ lastTime = ''
 
 def loadStockList():
 	for index in range(1,len(sys.argv)):
-		stockNumber = sys.argv[index];
+		stockNumber = sys.argv[index]
 		if len(stockNumber) == 8:
 			# 8位长度的代码必须以sh或者sz开头
 			if (stockNumber.startswith('sh') or stockNumber.startswith('sz')) and stockNumber[2:8].decode().isdecimal():
@@ -31,6 +32,44 @@ def loadStockList():
 		return False
 	return True
 
+def printStockData(name, todayStart, yesterdayEnd, current, highest, lowest):
+	# 停牌处理
+	if todayStart == 0:
+		print('%s:停牌' % (name))
+		return
+	# 计算现价显示的小数点位数
+	if current < 1:
+		priceStr = '%.4f' % current
+	elif current < 10:
+		priceStr = '%.3f' % current
+	elif current < 100:
+		priceStr = '%.2f' % current
+	elif current < 1000:
+		priceStr = '%.1f' % current
+	else:
+		priceStr = '%.0f' % current
+	# 计算今日的涨跌幅
+	if current < yesterdayEnd:
+		increaseStr = '-%.2f%%' % ((yesterdayEnd - current) / yesterdayEnd * 100)
+		increaseStr = colored(increaseStr, 'green')
+	elif current > yesterdayEnd:
+		increaseStr = '+%.2f%%' % ((current - yesterdayEnd) / yesterdayEnd * 100)
+		increaseStr = colored(increaseStr, 'red')
+	else:
+		increaseStr = '0.00%'
+	# 计算现价在今日振幅中的百分点
+	if highest == lowest:
+		if current < yesterdayEnd:
+			percentStr = '0'
+		elif current > yesterdayEnd:
+			percentStr = '100'
+		else:
+			percentStr = '50'
+	else:
+		percentStr = '%.0f' % ((current - lowest) / (highest - lowest) * 100)
+	# 打印结果
+	print('%s:%s %s %s' % (name, priceStr, increaseStr, percentStr))
+
 def requestStockData():
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
 	content = urllib2.urlopen(url, timeout = 3).read()
@@ -44,7 +83,7 @@ def requestStockData():
 	# 循环抓取显示数据
 	match = stockPattern.search(content)
 	while match:
-		print('%s 开盘:%s 昨收:%s 现价:%s 最高:%s 最低:%s' % (match.group(1).decode('gbk').encode('utf-8'), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6)))
+		printStockData(match.group(1).decode('gbk').encode('utf-8'), float(match.group(2)), float(match.group(3)), float(match.group(4)), float(match.group(5)), float(match.group(6)))
 		match = stockPattern.search(content, match.end() + 1)
 
 if len(sys.argv) < 2:
