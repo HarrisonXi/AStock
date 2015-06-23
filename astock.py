@@ -72,7 +72,12 @@ def printStockData(name, todayStart, yesterdayEnd, current, highest, lowest):
 
 def requestStockData():
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
-	content = urllib2.urlopen(url, timeout = 3).read()
+	try:
+		content = urllib2.urlopen(url, timeout = 3).read()
+	except urllib2.URLError:
+		print('超时重试')
+		requestStockData()
+		return
 	# 判断数据时间有没有更新
 	global lastTime
 	match = timePattern.search(content)
