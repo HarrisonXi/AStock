@@ -12,9 +12,25 @@ http://hq.sinajs.cn/list=sz002024
 
     var hq_str_sz002024="苏宁云商,18.79,19.34,18.11,18.97,17.78,18.10,18.11,167063275,3060824697.67,136001,18.10,28200,18.09,22710,18.08,5500,18.07,15200,18.06,4500,18.11,39250,18.14,234000,18.15,700,18.16,8300,18.17,2015-06-19,13:26:23,00";
 
-前6个数据：股名，开盘价，昨收价，现价，最高价，最低价
+前6个数据：股名，开盘价，昨收价，现价，最高价，最低价，买一，卖一，成交量，成交额。后面还有5档买卖数据
 
 支持多个查询逗号隔开，例如：http://hq.sinajs.cn/list=sh603019,sz002024
+
+#新浪财经分时图API
+
+http://vip.stock.finance.sina.com.cn/quotes_service/view/vML_DataList.php?asc=j&symbol=sh600036&num=10
+
+    ['14:59:00', '18.17', '2640608']
+
+数据：价格，成交量
+
+#新浪财经交易明细API
+
+http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=10&symbol=sh600036
+
+    ('14:59:15', '288096', '18.200', 'UP')
+
+数据：成交量，价格，类型（UP-买，DOWN-卖，EQUAL-平）
 
 #和讯网实时行情API
 
@@ -26,9 +42,9 @@ http://webstock.quote.hermes.hexun.com/a/quotelist?code=szse000001&column=DateTi
 
 去除某些无用的数据，请求可以简化：
 
-http://webstock.quote.hermes.hexun.com/a/quotelist?code=sse600036&column=DateTime,LastClose,Open,High,Low,Price,Volume,Amount,BuyPrice,BuyVolume,SellPrice,SellVolume
+http://webstock.quote.hermes.hexun.com/a/quotelist?code=sse600036&column=DateTime,LastClose,Open,High,Low,Price,Volume
 
-    ({"Data":[[[20150701150011,1872,1833,1866,1806,1821,293674262,5395012371,[1820,1819,1818,1817,1816],[1300,5100,13700,93800,60700],[1824,1825,1826,1827,1828],[4700,64400,79500,93001,35500]]]]});
+    ({"Data":[[[20150701145959,1872,1833,1866,1806,1821,293674262]]]});
 
 #和讯网分时图API
 
