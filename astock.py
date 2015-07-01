@@ -1,6 +1,7 @@
 #coding=utf-8\
 import sys
 import urllib2
+import socket
 import re
 import time
 from termcolor import colored
@@ -34,7 +35,7 @@ def loadStockList():
 
 def printStockData(name, todayStart, yesterdayEnd, current, highest, lowest):
 	# 停牌处理
-	if todayStart == 0:
+	if todayStart == 0 or yesterdayEnd == 0:
 		print('%s:停牌' % (name))
 		return
 	# 计算现价显示的小数点位数
@@ -78,10 +79,14 @@ def requestStockData():
 		print('超时重试')
 		requestStockData()
 		return
+	except socket.timeout:
+		print('超时重试')
+		requestStockData()
+		return
 	# 判断数据时间有没有更新
 	global lastTime
 	match = timePattern.search(content)
-	if match.group(1) == lastTime:
+	if match == None or match.group(1) == lastTime:
 		return
 	lastTime = match.group(1)
 	print(lastTime)
