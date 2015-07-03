@@ -1,18 +1,45 @@
 #新浪财经历史数据API
 
-http://biz.finance.sina.com.cn/stock/flash_hq/kline_data.php?symbol=sh000001&begin_date=20150101
+http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=60&ma=no&datalen=100
 
-    <content d="2015-01-05" o="3258.627" h="3369.281" c="3350.519" l="3253.883" v="531352384" bl=""/>
-    <content d="2015-01-06" o="3330.799" h="3394.224" c="3351.446" l="3303.184" v="501661696" bl=""/>
+	{day:"2015-07-02 14:00:00",open:"18.850",high:"18.950",low:"18.500",close:"18.650",volume:"71039840"}
+	{day:"2015-07-02 15:00:00",open:"18.660",high:"18.980",low:"18.010",close:"18.650",volume:"129299168"}
 
-数据字典：d-日期，o-开盘价，c-现价/收盘价，h-最高价，l-最低价，v-交易量（手）
+数据：开盘价，最高价，最低价，收盘价，交易量（股）
 
-http://biz.finance.sina.com.cn/stock/flash_hq/kline_data.php?symbol=sz002604&begin_date=20150101
+http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=240$ma=no&datalen=100
 
-    <content d="2015-06-04" o="31.800" h="32.730" c="31.510" l="28.950" v="148864" bl=""/>
-    <content d="2015-06-05" o="20.190" h="20.590" c="19.230" l="19.010" v="274410" bl=""/>
+	{day:"2015-07-01",open:"18.330",high:"18.660",low:"18.060",close:"18.210",volume:"293674272"}
+	{day:"2015-07-02",open:"18.810",high:"19.180",low:"17.950",close:"18.650",volume:"524774688"}
 
-但是遇到的明显问题是没有办法计算前后复权，如上龙力生物2015年6月5日除权
+值得一提的是改成scale=240就变成日K了，scale=1200变成周K，分钟级别的还支持5、15和30分钟 
+
+http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=240&datalen=100
+
+	{day:"2015-07-01",open:"18.330",high:"18.660",low:"18.060",close:"18.210",volume:"293674272",ma_price5:18.04,ma_volume5:395533120,ma_price10:18.422,ma_volume10:325295078,ma_price30:19.072,ma_volume30:315460913}
+	{day:"2015-07-02",open:"18.810",high:"19.180",low:"17.950",close:"18.650",volume:"524774688",ma_price5:18.082,ma_volume5:435026694,ma_price10:18.344,ma_volume10:352498610,ma_price30:19.092,ma_volume30:321150727}
+
+然后去掉ma=no参数还可以获得5、10和30日均值，简直良心
+
+关于复权数据，以龙力生物2015年6月5日复权为例，当日该股下跌2.26%
+
+http://finance.sina.com.cn/realstock/company/sz002604/qianfuquan.js?d=2015-07-02
+
+	_2015_06_05:"2.076895"
+	_2015_06_04:"2.124909"
+	2.076895 / 2.124909 = 0.9774
+
+前复权接口
+
+http://finance.sina.com.cn/realstock/company/sz002604/houfuquan.js?d=2015-07-02
+
+	_2015_06_05:"52.5870"
+	_2015_06_04:"53.8027"
+	52.5870 / 53.8027 = 0.9774
+
+后复权接口
+
+可以看到前后复权接口实际上是一样的，后一日除以前一日得到的值固定
 
 #和讯网历史数据API
 
