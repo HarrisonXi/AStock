@@ -74,7 +74,7 @@ def printStockData(name, todayStart, yesterdayEnd, current, highest, lowest):
 def requestStockData():
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
 	try:
-		content = urllib2.urlopen(url, timeout = 3).read()
+		content = urllib2.urlopen(url, timeout = 5).read()
 	except urllib2.URLError:
 		print('超时重试')
 		requestStockData()
@@ -103,4 +103,4 @@ elif not loadStockList():
 else:
 	while True:
 		requestStockData()
-		time.sleep(6)
+		time.sleep(5)
