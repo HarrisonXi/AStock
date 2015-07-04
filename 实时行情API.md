@@ -29,9 +29,12 @@ http://vip.stock.finance.sina.com.cn/quotes_service/view/vML_DataList.php?asc=j&
 http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=10&symbol=sh600036
 
     trade_item_list[2] = new Array('14:59:55', '85920', '18.590', 'DOWN');
+
+数据：成交量(股)，价格，类型（UP-买，DOWN-卖，EQUAL-平）
+
     trade_INVOL_OUTVOL=[287021989,237752699];
 
-数据：成交量(股)，价格，类型（UP-买，DOWN-卖，EQUAL-平）。尾部额外带了当日总买入股数和卖出股数
+尾部额外带了当日总买入股数和卖出股数
 
 http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_BillList.php?sort=ticktime&symbol=sh600036&num=10
 
