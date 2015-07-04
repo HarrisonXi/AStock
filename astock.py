@@ -20,15 +20,19 @@ def loadStockList():
 				stockList.append(stockNumber)
 		elif len(stockNumber) == 6:
 			if stockNumber.decode().isdigit():
-				# 6位长度的0开头自动补sz，6开头的自动补sh
+				# 6位长度的0开头自动补sz，6开头补sh，3开头补sz
 				if stockNumber.startswith('0'):
 					stockList.append('sz' + stockNumber)
 				elif stockNumber.startswith('6'):
 					stockList.append('sh' + stockNumber)
+				elif stockNumber.startswith('3'):
+					stockList.append('sz' + stockNumber)
 		elif stockNumber == 'sh':
 			stockList.append('sh000001')
 		elif stockNumber == 'sz':
 			stockList.append('sz399001')
+		elif stockNumber == 'cy':
+			stockList.append('sz399006')
 	if len(stockList) == 0:
 		return False
 	return True

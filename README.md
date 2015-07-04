@@ -16,6 +16,7 @@ A python script to monitor Chinese stocks in terminal. 一个在终端监视A股
 
 0字头股票代码脚本会自动补sz
 6字头股票代码脚本会自动补sh
+3字头股票代码脚本会自动补sz
 
     python astock.py 603019 002024
 
@@ -27,6 +28,7 @@ A python script to monitor Chinese stocks in terminal. 一个在终端监视A股
 
 sh:上证指数
 sz:深证指数
+cy:创业板指
 
     python astock.py sh sz
 
