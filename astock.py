@@ -14,12 +14,12 @@ lastData = []
 
 class Stock:
 	def __init__(self, name, todayStart, yesterdayEnd, current, highest, lowest):
-		self.name = name
-		self.todayStart = todayStart
-		self.yesterdayEnd = yesterdayEnd
-		self.current = current
-		self.highest = highest
-		self.lowest = lowest
+		self.name = name.decode('gbk').encode('utf-8')
+		self.todayStart = float(todayStart)
+		self.yesterdayEnd = float(yesterdayEnd)
+		self.current = float(current)
+		self.highest = float(highest)
+		self.lowest = float(lowest)
 
 def loadStockList():
 	for index in range(1,len(sys.argv)):
@@ -103,7 +103,7 @@ def requestAllStockData():
 	lastData[:] = []
 	match = stockPattern.search(content)
 	while match:
-		lastData.append(Stock(match.group(1).decode('gbk').encode('utf-8'), float(match.group(2)), float(match.group(3)), float(match.group(4)), float(match.group(5)), float(match.group(6))))
+		lastData.append(Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6)))
 		match = stockPattern.search(content, match.end() + 1)
 	return 0
 
