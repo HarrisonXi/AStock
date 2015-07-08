@@ -1,25 +1,16 @@
-#coding=utf-8\
+# -*- coding: utf-8 -*-
 import sys
 import urllib2
 import socket
 import re
 import time
-from termcolor import colored
+from aclass import *
 
 stockList = []
 timePattern = re.compile(r',(\d+:\d+:\d+),')
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),.+?\"')
 lastTime = ''
 lastData = []
-
-class Stock:
-	def __init__(self, name, todayStart, yesterdayEnd, current, highest, lowest):
-		self.name = name.decode('gbk').encode('utf-8')
-		self.todayStart = float(todayStart)
-		self.yesterdayEnd = float(yesterdayEnd)
-		self.current = float(current)
-		self.highest = float(highest)
-		self.lowest = float(lowest)
 
 def loadStockList():
 	for index in range(1,len(sys.argv)):
@@ -47,45 +38,7 @@ def loadStockList():
 		return False
 	return True
 
-def printStockData(stock):
-	# 停牌处理
-	if stock.todayStart == 0 or stock.yesterdayEnd == 0:
-		print('%s:停牌' % (stock.name))
-		return
-	# 计算现价显示的小数点位数
-	if stock.current < 1:
-		priceStr = '%.4f' % stock.current
-	elif stock.current < 10:
-		priceStr = '%.3f' % stock.current
-	elif stock.current < 100:
-		priceStr = '%.2f' % stock.current
-	elif stock.current < 1000:
-		priceStr = '%.1f' % stock.current
-	else:
-		priceStr = '%.0f' % stock.current
-	# 计算今日的涨跌幅
-	if stock.current < stock.yesterdayEnd:
-		increaseStr = '-%.2f%%' % ((stock.yesterdayEnd - stock.current) / stock.yesterdayEnd * 100)
-		increaseStr = colored(increaseStr, 'green')
-	elif stock.current > stock.yesterdayEnd:
-		increaseStr = '+%.2f%%' % ((stock.current - stock.yesterdayEnd) / stock.yesterdayEnd * 100)
-		increaseStr = colored(increaseStr, 'red')
-	else:
-		increaseStr = '0.00%'
-	# 计算现价在今日振幅中的百分比位置
-	if stock.highest == stock.lowest:
-		if stock.current < stock.yesterdayEnd:
-			percentStr = '0'
-		elif stock.current > stock.yesterdayEnd:
-			percentStr = '100'
-		else:
-			percentStr = '50'
-	else:
-		percentStr = '%.0f' % ((stock.current - stock.lowest) / (stock.highest - stock.lowest) * 100)
-	# 打印结果
-	print('%s:%s %s %s' % (stock.name, priceStr, increaseStr, percentStr))
-
-def requestAllStockData():
+def requestStockData():
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
 	try:
 		content = urllib2.urlopen(url, timeout = 5).read()
@@ -113,11 +66,11 @@ elif loadStockList() == False:
 	print('没有有效的股票代码')
 else:
 	while True:
-		result = requestAllStockData()
+		result = requestStockData()
 		if result == 0:
 			print(lastTime)
 			for stock in lastData:
-				printStockData(stock)
+				stock.printStockData()
 			time.sleep(5)
 		elif result == 1:
 			print('超时重试')
