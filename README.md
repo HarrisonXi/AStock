@@ -4,25 +4,25 @@ A python script to monitor Chinese stocks in terminal. 一个在终端监视A股
 
 ## 使用示例
 
-    python astock.py sh603019 sz002024
+    python astock.py sh600000 sz000001
 
 输出示例
 
 ![输出示例][1]
 
-自动着色，最后一个参数=(现价-最低价)/(最高价-最低价)，用来指示现价在今日振幅中所处的百分比位置
+自动着色。在涨跌幅后面的值是今日振幅。最后一个值=(现价-最低价)/(最高价-最低价)，用来指示现价在今日振幅中所处的百分比位置。
 
 ## 自动补全
 
-0字头股票代码脚本会自动补sz
 6字头股票代码脚本会自动补sh
+0字头股票代码脚本会自动补sz
 3字头股票代码脚本会自动补sz
 
-    python astock.py 603019 002024
+    python astock.py 600000 000001
 
 等于
 
-    python astock.py sh603019 sz002024
+    python astock.py sh600000 sz000001
 
 ## 特殊代码
 

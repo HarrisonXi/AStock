@@ -8,7 +8,7 @@ from aclass import *
 
 stockList = []
 timePattern = re.compile(r',(\d+:\d+:\d+),')
-stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),.+?\"')
+stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),.+\"')
 lastTime = ''
 lastData = []
 
@@ -41,14 +41,14 @@ def loadStockList():
 def requestStockData():
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
 	try:
-		content = urllib2.urlopen(url, timeout = 5).read()
+		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
 		return 1
 	except socket.timeout:
 		return 1
 	# 判断数据时间有没有更新
-	global lastTime
 	match = timePattern.search(content)
+	global lastTime
 	if match == None or match.group(1) == lastTime:
 		return 2
 	lastTime = match.group(1)
@@ -56,12 +56,12 @@ def requestStockData():
 	lastData[:] = []
 	match = stockPattern.search(content)
 	while match:
-		lastData.append(Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6)))
+		lastData.append(Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6), match.group(7), match.group(8)))
 		match = stockPattern.search(content, match.end() + 1)
 	return 0
 
 if len(sys.argv) < 2:
-	print('使用示例: python astock.py sh603019 sz002024\n自动补全：0字头股票代码脚本会自动补sz，6字头股票代码补sh\n特殊代码：sh-上证指数，sz-深证指数')
+	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，cy-创业板指')
 elif loadStockList() == False:
 	print('没有有效的股票代码')
 else:
