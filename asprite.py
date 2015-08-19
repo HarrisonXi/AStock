@@ -22,12 +22,9 @@ def requestAndPrintStockData(stockCode):
 	stock.printStockData()
 	return True
 
-def compareStockTrans(trans1, trans2):
-	return trans1.volume - trans2.volume
-
 def checkStockTrans(stockCode):
-	# 1小时最大数据量是1150左右，10分钟取个200
-	url = 'http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=200&symbol=' + stockCode
+	# 1小时最大数据量是1150左右
+	url = 'http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=2500&symbol=' + stockCode
 	try:
 		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
@@ -36,23 +33,32 @@ def checkStockTrans(stockCode):
 		return False
 	# 抓取数据存入数组
 	transList = []
+	validTime = 0
+	maxVolume = 0
+	minVolume = 9999
 	match = transPattern.search(content)
 	while match:
 		trans = Trans(match.group(1), match.group(2), match.group(3), match.group(4))
-		transList.append(trans)
+		if validTime == 0:
+			validTime = transList.time - 20000
+		if trans.time >= validTime:
+			if trans.volume > maxVolume:
+				maxVolume = trans.volume
+			if trans.volume < minVolume:
+				minVolume = trans.volume
+			transList.append(trans)
 		match = transPattern.search(content, match.end() + 1)
 	# 检查数据
-	if False:
-		while requestAndPrintStockData(stockCode) == False:
-			pass
+	# if len(transList) > 0:
+	# 	while requestAndPrintStockData(stockCode) == False:
+	# 		pass
 	return True
 
-while True:
-	for szCode in xrange(1, 2777, 10):
-		stockCode = 'sz%06d' % (szCode)
-		while checkStockTrans(stockCode) == False:
-			pass
-	for shCode in xrange(600000, 603999, 10):
-		stockCode = 'sh%06d' % (shCode)
-		while checkStockTrans(stockCode) == False:
-			pass
+for szCode in xrange(1, 2777, 10):
+	stockCode = 'sz%06d' % (szCode)
+	while checkStockTrans(stockCode) == False:
+		pass
+for shCode in xrange(600000, 603999, 10):
+	stockCode = 'sh%06d' % (shCode)
+	while checkStockTrans(stockCode) == False:
+		pass
