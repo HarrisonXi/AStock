@@ -43,11 +43,11 @@ class Stock:
 		elif self.highest == self.lowest:
 			rangeStr = ' 0.00%'
 			if self.current < self.yesterdayEnd:
-				percentStr = ' 0'
+				percentStr = ' 0.0'
 			elif self.current > self.yesterdayEnd:
-				percentStr = ' 100'
+				percentStr = ' 100.0'
 			else:
-				percentStr = ' 50'
+				percentStr = ' 50.0'
 		else:
 			rangeStr = ' %.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
 			percentStr = ' %.1f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
