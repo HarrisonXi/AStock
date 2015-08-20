@@ -8,7 +8,7 @@ from aclass import *
 
 stockList = []
 timePattern = re.compile(r',(\d+:\d+:\d+),')
-stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),.+\"')
+stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),[^,]+,[^,]+,[^,]+,[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,.+\"')
 lastTime = ''
 lastData = []
 
@@ -56,7 +56,9 @@ def requestStockData():
 	lastData[:] = []
 	match = stockPattern.search(content)
 	while match:
-		lastData.append(Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6), match.group(7), match.group(8)))
+		stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6));
+		stock.calcBuyPercent([match.group(7), match.group(8), match.group(9), match.group(10), match.group(11), match.group(12), match.group(13), match.group(14), match.group(15), match.group(16)]);
+		lastData.append(stock)
 		match = stockPattern.search(content, match.end() + 1)
 	return 0
 

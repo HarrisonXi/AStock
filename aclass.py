@@ -2,15 +2,28 @@
 from termcolor import colored
 
 class Stock:
-	def __init__(self, name, todayStart, yesterdayEnd, current, highest = '0', lowest = '0', buyPrice = '0', sellPrice = '0'):
+	def __init__(self, name, todayStart, yesterdayEnd, current, highest = '0', lowest = '0'):
 		self.name = name.decode('gbk').encode('utf-8')
 		self.todayStart = float(todayStart)
 		self.yesterdayEnd = float(yesterdayEnd)
 		self.current = float(current)
 		self.highest = float(highest)
 		self.lowest = float(lowest)
-		self.buyPrice = float(buyPrice)
-		self.sellPrice = float(sellPrice)
+		self.buyPercent = 0
+
+	def calcBuyPercent(self, volumes):
+		if len(volumes) < 10:
+			return
+		buyVolume = 0
+		for index in range(0, 5):
+			buyVolume += float(volumes[index])
+		sellVolume = 0
+		for index in range(5, 10):
+			sellVolume += float(volumes[index])
+		if buyVolume == 0 and sellVolume == 0:
+			self.buyPercent = 0
+		else:
+			self.buyPercent = buyVolume / (buyVolume + sellVolume) * 2 - 1;
 
 	def printStockData(self):
 		# 停牌处理
@@ -51,18 +64,25 @@ class Stock:
 		else:
 			rangeStr = ' %.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
 			percentStr = ' %.1f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
-		# 如果有买一卖一数据，给百分比数据着色
-		if len(percentStr) == 0 or (self.sellPrice == 0 and self.buyPrice == 0):
+		# 给百分比数据着色
+		if self.buyPercent < 0.2 and self.buyPercent > -0.2:
 			pass
-		elif self.sellPrice == 0 and self.buyPrice > 0:
+		elif self.buyPercent >= 0.8:
+			percentStr = colored(percentStr + '+++', 'red')
+		elif self.buyPercent >= 0.6:
+			percentStr = colored(percentStr + '++', 'red')
+		elif self.buyPercent >= 0.4:
+			percentStr = colored(percentStr + '+', 'red')
+		elif self.buyPercent >= 0.2:
 			percentStr = colored(percentStr, 'red')
-		elif self.buyPrice > 0 and self.sellPrice == 0: 
+		elif self.buyPercent <= -0.8: 
+			percentStr = colored(percentStr + '---', 'green')
+		elif self.buyPercent <= -0.6: 
+			percentStr = colored(percentStr + '--', 'green')
+		elif self.buyPercent <= -0.4: 
+			percentStr = colored(percentStr + '-', 'green')
+		elif self.buyPercent <= -0.2: 
 			percentStr = colored(percentStr, 'green')
-		elif self.sellPrice > self.buyPrice:
-			if self.sellPrice <= self.current:
-				percentStr = colored(percentStr, 'green')
-			elif self.buyPrice >= self.current:
-				percentStr = colored(percentStr, 'red')
 		# 打印结果
 		print('%s: %s %s%s%s' % (self.name, priceStr, increaseStr, rangeStr, percentStr))
 
