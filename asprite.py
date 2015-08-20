@@ -19,7 +19,8 @@ def requestAndPrintStockData(stockCode):
 		return False
 	match = stockPattern.search(content)
 	stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4))
-	stock.printStockData()
+	if stock.current >= stock.yesterdayEnd * 0.9666667:
+		stock.printStockData()
 	return True
 
 def checkStockTrans(stockCode):
@@ -34,31 +35,49 @@ def checkStockTrans(stockCode):
 	# 抓取数据存入数组
 	transList = []
 	validTime = 0
-	maxVolume = 0
-	minVolume = 9999
+	# maxVolume = 0
+	# minVolume = 99999999
+	maxPrice = 0
+	minPrice = 9999
 	match = transPattern.search(content)
 	while match:
 		trans = Trans(match.group(1), match.group(2), match.group(3), match.group(4))
 		if validTime == 0:
-			validTime = transList.time - 10000
+			validTime = trans.time - 10000
 		if trans.time >= validTime:
-			if trans.volume > maxVolume:
-				maxVolume = trans.volume
-			if trans.volume < minVolume:
-				minVolume = trans.volume
+			# if trans.volume > maxVolume:
+			# 	maxVolume = trans.volume
+			# if trans.volume < minVolume:
+			# 	minVolume = trans.volume
+			if trans.price > maxPrice:
+				maxPrice = trans.price
+			if trans.price < minPrice:
+				minPrice = trans.price
 			transList.append(trans)
 		match = transPattern.search(content, match.end() + 1)
 	# 检查数据
-	# if len(transList) > 0:
-	# 	while requestAndPrintStockData(stockCode) == False:
-	# 		pass
+	if len(transList) > 0:
+		buyVolume = 0
+		sellVolume = 0
+		for trans in transList:
+			if trans.type > 0:
+				buyVolume += trans.volume
+			elif trans.type < 0:
+				sellVolume += trans.volume
+		if buyVolume > sellVolume * 1.5:
+			while requestAndPrintStockData(stockCode) == False:
+				pass
 	return True
 
-for szCode in xrange(1, 2777, 10):
-	stockCode = 'sz%06d' % (szCode)
-	while checkStockTrans(stockCode) == False:
+if len(sys.argv) > 1:
+	while checkStockTrans(sys.argv[1]) == False:
 		pass
-for shCode in xrange(600000, 603999, 10):
-	stockCode = 'sh%06d' % (shCode)
-	while checkStockTrans(stockCode) == False:
-		pass
+else:
+	for szCode in xrange(1, 2777):
+		stockCode = 'sz%06d' % (szCode)
+		while checkStockTrans(stockCode) == False:
+			pass
+	for shCode in xrange(600000, 603999):
+		stockCode = 'sh%06d' % (shCode)
+		while checkStockTrans(stockCode) == False:
+			pass
