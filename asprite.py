@@ -23,8 +23,8 @@ def requestAndPrintStockData(stockCode):
 	return True
 
 def checkStockTrans(stockCode):
-	# 1小时最大数据量是1150左右
-	url = 'http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=2500&symbol=' + stockCode
+	# 1小时最大数据量是1150左右，因为交易系统3秒撮合一次，所以理论最大值为1小时1200
+	url = 'http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=1200&symbol=' + stockCode
 	try:
 		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
@@ -40,7 +40,7 @@ def checkStockTrans(stockCode):
 	while match:
 		trans = Trans(match.group(1), match.group(2), match.group(3), match.group(4))
 		if validTime == 0:
-			validTime = transList.time - 20000
+			validTime = transList.time - 10000
 		if trans.time >= validTime:
 			if trans.volume > maxVolume:
 				maxVolume = trans.volume
