@@ -4,8 +4,10 @@ import urllib2
 import socket
 import re
 import time
+import threading
 from aclass import *
 
+threadLock = threading.Lock()
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),.+\"')
 transPattern = re.compile(r'new Array\(\'([\d:]+)\', \'(\d+)\', \'([\d\.]+)\', \'(DOWN|UP|EQUAL)\'\)')
 
@@ -78,6 +80,7 @@ def checkStockTrans(stockCode, forceShow = False):
 			while stock == False:
 				stock = requestStockData(stockCode)
 			if forceShow or stock.current >= stock.yesterdayEnd * 0.9666667:
+				threadLock.acquire()
 				print('==== ' + stockCode + ' ====')
 				stock.printStockData()
 				print('开始价: %.2f' % (transList[-1].price))
@@ -85,17 +88,23 @@ def checkStockTrans(stockCode, forceShow = False):
 				print('最高价: %.2f' % (maxPrice))
 				print('买量比: %.1f%%' % (buyVolume * 100.0 / sellVolume))
 				print('高价比: %.1f%%' % (highCount * 100.0 / len(transList)))
+				threadLock.release()
 	return True
+
+def threadFunction(stockPrefix, start, end, step):
+	for stockNumber in xrange(start, end, step):
+		stockCode = '%s%06d' % (stockPrefix, stockNumber)
+		while checkStockTrans(stockCode) == False:
+			pass
 
 if len(sys.argv) > 1:
 	while checkStockTrans(sys.argv[1], True) == False:
 		pass
 else:
-	for szCode in xrange(1, 2777):
-		stockCode = 'sz%06d' % (szCode)
-		while checkStockTrans(stockCode) == False:
-			pass
-	for shCode in xrange(600000, 603999):
-		stockCode = 'sh%06d' % (shCode)
-		while checkStockTrans(stockCode) == False:
-			pass
+	step = 50
+	for index in xrange(1, step):
+		thread = threading.Thread(target = threadFunction, args = ('sz', 1 + index, 2784, step));
+		thread.start()
+	for index in xrange(1, step):
+		thread = threading.Thread(target = threadFunction, args = ('sh', 600000 + index, 603999, step));
+		thread.start()
