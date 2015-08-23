@@ -98,18 +98,21 @@ def threadFunction(stockPrefix, start, end, step):
 			pass
 
 if len(sys.argv) > 1:
-	while checkStockTrans(sys.argv[1], True) == False:
-		pass
+	if len(stockNumber) == 8 and (stockNumber.startswith('sh') or stockNumber.startswith('sz')) and stockNumber[2:8].decode().isdecimal():
+		while checkStockTrans(sys.argv[1], True) == False:
+			pass
+	else:
+		print('无效的股票代码')
 else:
 	startTime = time.time()
 	threadList = []
 	step = 50
 	for index in xrange(1, step):
-		thread = threading.Thread(target = threadFunction, args = ('sz', 1 + index, 2784, step));
+		thread = threading.Thread(target = threadFunction, args = ('sz', 1 + index, 2784, step))
 		thread.start()
 		threadList.append(thread)
 	for index in xrange(1, step):
-		thread = threading.Thread(target = threadFunction, args = ('sh', 600000 + index, 603999, step));
+		thread = threading.Thread(target = threadFunction, args = ('sh', 600000 + index, 603999, step))
 		thread.start()
 		threadList.append(thread)
 	for thread in threadList:
