@@ -7,6 +7,7 @@ import time
 import threading
 from aclass import *
 
+mainData = 0.0
 threadLock = threading.Lock()
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),.+\"')
 transPattern = re.compile(r'new Array\(\'([\d:]+)\', \'(\d+)\', \'([\d\.]+)\', \'(DOWN|UP|EQUAL)\'\)')
@@ -32,64 +33,68 @@ def checkStockTrans(stockCode, forceShow = False):
 		return False
 	except socket.timeout:
 		return False
-	# 抓取数据存入数组
-	transList = []
+	# 抓取数据存入数组，仅存入1小时以内的数据
 	validTime = 0
-	# maxVolume = 0
-	# minVolume = 99999999
-	maxPrice = 0
-	minPrice = 9999
+	transList = []
 	match = transPattern.search(content)
 	while match:
 		trans = Trans(match.group(1), match.group(2), match.group(3), match.group(4))
 		if validTime == 0:
-			validTime = trans.time - 10000
+			validTime = trans.time - 100
 		if trans.time >= validTime:
-			# if trans.volume > maxVolume:
-			# 	maxVolume = trans.volume
-			# if trans.volume < minVolume:
-			# 	minVolume = trans.volume
-			if trans.price > maxPrice:
-				maxPrice = trans.price
-			if trans.price < minPrice:
-				minPrice = trans.price
-			transList.append(trans)
+			transList.insert(0, trans)
+		else:
+			break
 		match = transPattern.search(content, match.end() + 1)
-	# 检查数据
+	# 检查数据，确定有数据的情况下进入筛选逻辑
 	if len(transList) > 0:
-		midPrice = (maxPrice + minPrice) * 0.5
-		buyVolume = 0
-		sellVolume = 0
-		highCount = 0
+		# 先计算出该返回的结果
+		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
+		# 比大盘涨的少于1%
+		if forceShow == False and increase < mainData + 1:
+			return increase
+		# 基础数据的计算
+		buyVolume = 1
+		sellVolume = 1
+		maxPrice = 0.0
+		minPrice = 9999.0
 		for trans in transList:
 			if trans.type > 0:
 				buyVolume += trans.volume
 			elif trans.type < 0:
 				sellVolume += trans.volume
-			if trans.price > midPrice:
-				highCount += 1
-		passCheck = True
-		if buyVolume < sellVolume * 1.333333:
-			passCheck = False
-		if highCount < len(transList) * 0.5:
-			passCheck = False
-		if transList[0].price < transList[-1].price:
-			passCheck = False
-		if forceShow or passCheck:
+			if trans.price > maxPrice:
+				maxPrice = trans.price
+			if trans.price < minPrice:
+				minPrice = trans.price
+		# 买盘比卖盘还少
+		if forceShow == False and buyVolume < sellVolume:
+			return increase
+		# 振幅不到3%
+		rangee = (maxPrice - minPrice) / transList[0].price * 100
+		if forceShow == False and rangee < 3:
+			return increase
+		# 合并换手数据为分钟数据
+		pass
+		# 获得股票名称等数据
+		stock = requestStockData(stockCode)
+		while stock == False:
 			stock = requestStockData(stockCode)
-			while stock == False:
-				stock = requestStockData(stockCode)
-			if forceShow or stock.current >= stock.yesterdayEnd * 0.9666667:
-				threadLock.acquire()
-				print('==== ' + stockCode + ' ====')
-				stock.printStockData()
-				print('开始价: %.2f' % (transList[-1].price))
-				print('最低价: %.2f' % (minPrice))
-				print('最高价: %.2f' % (maxPrice))
-				print('买量比: %.1f%%' % (buyVolume * 100.0 / sellVolume))
-				print('高价比: %.1f%%' % (highCount * 100.0 / len(transList)))
-				threadLock.release()
-	return True
+		# 跌幅已经超过5%
+		if forceShow == False and stock.current < stock.yesterdayEnd * 0.95:
+			return increase
+		# 打印数据
+		threadLock.acquire()
+		print('==== ' + stockCode + ' ====')
+		stock.printStockData()
+		print('开收价: %.2f ~ %.2f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
+		print('低高价: %.2f ~ %.2f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
+		print('买卖比: %.1f%%' % (buyVolume * 100.0 / sellVolume))
+		threadLock.release()
+		# 检查打印完后的返回
+		return increase
+	else:
+		return 0.0
 
 def threadFunction(stockPrefix, start, end, step):
 	for stockNumber in xrange(start, end, step):
@@ -98,15 +103,21 @@ def threadFunction(stockPrefix, start, end, step):
 			pass
 
 if len(sys.argv) > 1:
-	if len(stockNumber) == 8 and (stockNumber.startswith('sh') or stockNumber.startswith('sz')) and stockNumber[2:8].decode().isdecimal():
+	# 指定股票代码
+	if len(sys.argv[1]) == 8 and (sys.argv[1].startswith('sh') or sys.argv[1].startswith('sz')) and sys.argv[1][2:8].decode().isdecimal():
 		while checkStockTrans(sys.argv[1], True) == False:
 			pass
 	else:
 		print('无效的股票代码')
 else:
+	# 未指定股票代码，先获得大盘数据用于比对
+	mainData = checkStockTrans('sh000001', True)
+	while mainData == False:
+		mainData = checkStockTrans('sh000001', True)
+	# 多线循环筛选所有股票数据
 	startTime = time.time()
-	threadList = []
 	step = 50
+	threadList = []
 	for index in xrange(1, step):
 		thread = threading.Thread(target = threadFunction, args = ('sz', 1 + index, 2784, step))
 		thread.start()
@@ -117,4 +128,4 @@ else:
 		threadList.append(thread)
 	for thread in threadList:
 		thread.join()
-	print('cost: %.2fs' % (time.time() - startTime))
+	print('总用时: %.2f秒' % (time.time() - startTime))
