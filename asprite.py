@@ -101,10 +101,17 @@ if len(sys.argv) > 1:
 	while checkStockTrans(sys.argv[1], True) == False:
 		pass
 else:
+	startTime = time.time()
+	threadList = []
 	step = 50
 	for index in xrange(1, step):
 		thread = threading.Thread(target = threadFunction, args = ('sz', 1 + index, 2784, step));
 		thread.start()
+		threadList.append(thread)
 	for index in xrange(1, step):
 		thread = threading.Thread(target = threadFunction, args = ('sh', 600000 + index, 603999, step));
 		thread.start()
+		threadList.append(thread)
+	for thread in threadList:
+		thread.join()
+	print('cost: %.2fs' % (time.time() - startTime))
