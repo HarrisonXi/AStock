@@ -47,6 +47,6 @@ for thread in threadList:
 for thread in threadList:
 	thread.join()
 validStockList.sort()
-print(','.join(validStockList))
+print("['" + "','".join(validStockList) + "']")
 print('总数量: %d' % (len(validStockList)))
 print('总用时: %.2f秒' % (time.time() - startTime))
