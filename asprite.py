@@ -7,9 +7,8 @@ import time
 import threading
 from aclass import *
 
-mainData = 0.0
 threadLock = threading.Lock()
-stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),.+\"')
+stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
 transPattern = re.compile(r'new Array\(\'([\d:]+)\', \'(\d+)\', \'([\d\.]+)\', \'(DOWN|UP|EQUAL)\'\)')
 
 def requestStockData(stockCode):
@@ -50,9 +49,6 @@ def checkStockTrans(stockCode, forceShow = False):
 	if len(transList) > 0:
 		# 先计算出该返回的结果
 		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
-		# 比大盘涨的少于1%
-		if forceShow == False and increase < mainData + 1:
-			return increase
 		# 基础数据的计算
 		buyVolume = 1
 		sellVolume = 1
@@ -110,10 +106,6 @@ if len(sys.argv) > 1:
 	else:
 		print('无效的股票代码')
 else:
-	# 未指定股票代码，先获得大盘数据用于比对
-	mainData = checkStockTrans('sh000001', True)
-	while mainData == False:
-		mainData = checkStockTrans('sh000001', True)
 	# 多线循环筛选所有股票数据
 	startTime = time.time()
 	step = 50
