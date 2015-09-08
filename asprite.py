@@ -23,7 +23,7 @@ def requestStockData(stockCode):
 	stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4))
 	return stock
 
-def checkStockTrans(stockCode, forceShow = False):
+def checkStockData(stockCode, forceShow = False):
 	# 1小时最大数据量是1150左右，因为交易系统3秒撮合一次，所以理论最大值为1小时1200
 	url = 'http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=1200&symbol=' + stockCode
 	try:
@@ -47,8 +47,10 @@ def checkStockTrans(stockCode, forceShow = False):
 		match = transPattern.search(content, match.end() + 1)
 	# 检查数据，确定有数据的情况下进入筛选逻辑
 	if len(transList) > 0:
-		# 先计算出该返回的结果
+		# 涨幅为负
 		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
+		if forceShow == False and increase < 0:
+			return True
 		# 基础数据的计算
 		buyVolume = 1
 		sellVolume = 1
@@ -65,20 +67,18 @@ def checkStockTrans(stockCode, forceShow = False):
 				minPrice = trans.price
 		# 买盘比卖盘还少
 		if forceShow == False and buyVolume < sellVolume:
-			return increase
+			return True
 		# 振幅不到3%
 		rangee = (maxPrice - minPrice) / transList[0].price * 100
 		if forceShow == False and rangee < 3:
-			return increase
-		# 合并换手数据为分钟数据
-		pass
+			return True
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
 		while stock == False:
 			stock = requestStockData(stockCode)
 		# 跌幅已经超过5%
 		if forceShow == False and stock.current < stock.yesterdayEnd * 0.95:
-			return increase
+			return True
 		# 打印数据
 		threadLock.acquire()
 		print('==== ' + stockCode + ' ====')
@@ -87,20 +87,17 @@ def checkStockTrans(stockCode, forceShow = False):
 		print('低高价: %.2f ~ %.2f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
 		print('买卖比: %.1f%%' % (buyVolume * 100.0 / sellVolume))
 		threadLock.release()
-		# 检查打印完后的返回
-		return increase
-	else:
-		return 0.0
+	return True
 
 def threadFunction(stockList):
 	for stockCode in stockList:
-		while checkStockTrans(stockCode) == False:
+		while checkStockData(stockCode) == False:
 			pass
 
 if len(sys.argv) > 1:
 	# 指定股票代码
 	if len(sys.argv[1]) == 8 and (sys.argv[1].startswith('sh') or sys.argv[1].startswith('sz')) and sys.argv[1][2:8].decode().isdecimal():
-		while checkStockTrans(sys.argv[1], True) == False:
+		while checkStockData(sys.argv[1], True) == False:
 			pass
 	else:
 		print('无效的股票代码')
