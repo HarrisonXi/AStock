@@ -6,6 +6,10 @@ import re
 import time
 from aclass import *
 
+ResultSuccess = 0
+ResultTimeout = 1
+ResultNoChange = 2
+
 stockList = []
 timePattern = re.compile(r',(\d+:\d+:\d+),')
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}=\"([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),([^,]+),[^,]+,[^,]+,[^,]+,[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,([^,]+),[^,]+,.+\"')
@@ -43,14 +47,14 @@ def requestStockData():
 	try:
 		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
-		return 1
+		return ResultTimeout
 	except socket.timeout:
-		return 1
+		return ResultTimeout
 	# 判断数据时间有没有更新
-	match = timePattern.search(content)
 	global lastTime
+	match = timePattern.search(content)
 	if match == None or match.group(1) == lastTime:
-		return 2
+		return ResultNoChange
 	lastTime = match.group(1)
 	# 循环抓取显示数据
 	lastData[:] = []
@@ -60,7 +64,7 @@ def requestStockData():
 		stock.calcBuyPercent([match.group(7), match.group(8), match.group(9), match.group(10), match.group(11), match.group(12), match.group(13), match.group(14), match.group(15), match.group(16)]);
 		lastData.append(stock)
 		match = stockPattern.search(content, match.end() + 1)
-	return 0
+	return ResultSuccess
 
 if len(sys.argv) < 2:
 	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，cy-创业板指')
@@ -69,14 +73,14 @@ elif loadStockList() == False:
 else:
 	while True:
 		result = requestStockData()
-		if result == 0:
+		if result == ResultSuccess:
 			print(lastTime)
 			for stock in lastData:
 				stock.printStockData()
 			time.sleep(5)
-		elif result == 1:
+		elif result == ResultTimeout:
 			print('超时重试')
-		elif result == 2:
+		elif result == ResultNoChange:
 			time.sleep(5)
 		else:
 			print('未知错误')
