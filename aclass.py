@@ -9,19 +9,19 @@ class Stock:
 		self.current = float(current)
 		self.highest = float(highest)
 		self.lowest = float(lowest)
-		self.buyPercent = 0
+		self.buyPercent = 0.0
 
 	def calcBuyPercent(self, volumes):
 		if len(volumes) < 10:
 			return
-		buyVolume = 0
+		buyVolume = 0.0
 		for index in range(0, 5):
 			buyVolume += float(volumes[index])
-		sellVolume = 0
+		sellVolume = 0.0
 		for index in range(5, 10):
 			sellVolume += float(volumes[index])
 		if buyVolume == 0 and sellVolume == 0:
-			self.buyPercent = 0
+			self.buyPercent = 0.0
 		else:
 			self.buyPercent = buyVolume / (buyVolume + sellVolume) * 2 - 1;
 
@@ -88,7 +88,7 @@ class Stock:
 
 class Trans:
 	def __init__(self, time, volume, price, type):
-		self.time = int(time.replace(':', ''))
+		self.time = int(time[0:2] + time[3:5])
 		self.volume = int(volume)
 		self.price = float(price)
 		if type == 'DOWN':
