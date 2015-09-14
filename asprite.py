@@ -47,7 +47,7 @@ def checkStockData(stockCode, forceShow = False):
 		match = transPattern.search(content, match.end() + 1)
 	# 检查数据，确定有数据的情况下进入筛选逻辑
 	if len(transList) > 0:
-		# 涨幅为负
+		# 排除涨幅为负的股票
 		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
 		if forceShow == False and increase < 0:
 			return True
@@ -65,39 +65,49 @@ def checkStockData(stockCode, forceShow = False):
 				maxPrice = trans.price
 			if trans.price < minPrice:
 				minPrice = trans.price
-		# 买盘比卖盘还少
+		# 排除买盘比卖盘还少的股票
 		if forceShow == False and buyVolume < sellVolume:
 			return True
-		# 振幅不到1%
+		# 排除振幅不到1%的股票
 		rangee = (maxPrice - minPrice) / transList[0].price * 100
 		if forceShow == False and rangee < 1:
 			return True
-		# 均价曾高过现价
+		# 排除均价曾高过现价的股票
 		totalVolume = 0
-		totalMoney = transList[0].price
+		totalMoney = 0.0
+		last5 = [Trans(), Trans(), Trans(), Trans(), Trans()]
 		for trans in transList:
 			totalVolume += trans.volume
 			totalMoney += trans.volume * trans.price
-			if trans.time >= 931:
+			last5.pop()
+			last5.insert(0, trans)
+			# 此判断是为了排除第一个分钟内的误差太大导致的误杀
+			if trans.time >= 931 and trans.time > transList[0].time:
+				volume5 = 0
+				moeny5 = 0.0
+				for last in last5:
+					volume5 += last.volume
+					moeny5 += last.volume * last.price
+				price5 = moeny5 / volume5
 				averagePrice = totalMoney / totalVolume
-				# print('%d: %.2f ~ %.2f %s' % (trans.time, trans.price, averagePrice, '-' if trans.price < averagePrice else ''))
-				if forceShow == False and averagePrice > trans.price:
+				# if forceShow == True:
+				# 	print('%2d:%2d %.3f %.3f %.3f%s%s' % (trans.time / 100, trans.time % 100, trans.price, price5, averagePrice, ' ~' if trans.price < averagePrice else '', ' -' if price5 < averagePrice else ''))
+				if forceShow == False and price5 > trans.price:
 					return True
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
 		while stock == False:
 			stock = requestStockData(stockCode)
-		# 涨幅未超过1%
-		if forceShow == False and stock.current < stock.yesterdayEnd * 1.01:
+		# 排除接近涨跌板的股票
+		if forceShow == False and (transList[-1].price > stock.yesterdayEnd * 1.09 or transList[-1].price < stock.yesterdayEnd * 0.91):
 			return True
 		# 打印数据
 		threadLock.acquire()
 		print('==== ' + stockCode + ' ====')
 		stock.printStockData()
-		print('起价现价: %.2f ~ %.2f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
-		print('最低最高: %.2f ~ %.2f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
-		print('平均成本: %.2f' % (averagePrice))
-		print('买卖比例: %.1f%%' % (buyVolume * 100.0 / sellVolume))
+		print('起价现价: %.3f ~ %.3f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
+		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
+		print('平均成本: %.3f 买卖比例: %.1f%%' % (averagePrice, buyVolume * 100.0 / sellVolume))
 		threadLock.release()
 	return True
 
