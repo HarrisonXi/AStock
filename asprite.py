@@ -23,7 +23,7 @@ def requestStockData(stockCode):
 	stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4))
 	return stock
 
-def checkStockData(stockCode, forceShow = False):
+def requestTransData(stockCode):
 	# 1小时最大数据量是1150左右，因为交易系统3秒撮合一次，所以理论最大值为1小时1200
 	url = 'http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=1200&symbol=' + stockCode
 	try:
@@ -45,12 +45,18 @@ def checkStockData(stockCode, forceShow = False):
 		else:
 			break
 		match = transPattern.search(content, match.end() + 1)
+	return transList
+
+def checkStockData(stockCode, forceShow = False):
+	transList = requestTransData(stockCode)
+	while transList == False:
+		transList = requestTransData(stockCode)
 	# 检查数据，确定有数据的情况下进入筛选逻辑
 	if len(transList) > 0:
 		# 排除涨幅为负的股票
 		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
 		if forceShow == False and increase < 0:
-			return True
+			return
 		# 基础数据的计算
 		buyVolume = 1
 		sellVolume = 1
@@ -67,11 +73,11 @@ def checkStockData(stockCode, forceShow = False):
 				minPrice = trans.price
 		# 排除买盘比卖盘还少的股票
 		if forceShow == False and buyVolume < sellVolume:
-			return True
+			return
 		# 排除振幅不到1%的股票
 		rangee = (maxPrice - minPrice) / transList[0].price * 100
 		if forceShow == False and rangee < 1:
-			return True
+			return
 		# 排除均价曾高过现价的股票
 		totalVolume = 0
 		totalMoney = 0.0
@@ -93,14 +99,14 @@ def checkStockData(stockCode, forceShow = False):
 				# if forceShow == True:
 				# 	print('%2d:%2d %.3f %.3f %.3f%s%s' % (trans.time / 100, trans.time % 100, trans.price, price5, averagePrice, ' ~' if trans.price < averagePrice else '', ' -' if price5 < averagePrice else ''))
 				if forceShow == False and price5 > trans.price:
-					return True
+					return
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
 		while stock == False:
 			stock = requestStockData(stockCode)
 		# 排除接近涨跌板的股票
 		if forceShow == False and (transList[-1].price > stock.yesterdayEnd * 1.09 or transList[-1].price < stock.yesterdayEnd * 0.91):
-			return True
+			return
 		# 打印数据
 		threadLock.acquire()
 		print('==== ' + stockCode + ' ====')
@@ -109,12 +115,10 @@ def checkStockData(stockCode, forceShow = False):
 		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
 		print('平均成本: %.3f 买卖比例: %.1f%%' % (averagePrice, buyVolume * 100.0 / sellVolume))
 		threadLock.release()
-	return True
 
 def threadFunction(stockList):
 	for stockCode in stockList:
-		while checkStockData(stockCode) == False:
-			pass
+		checkStockData(stockCode)
 
 if len(sys.argv) > 1:
 	# 指定股票代码
