@@ -97,3 +97,13 @@ class Trans:
 			self.type = 1
 		else:
 			self.type = 0
+
+	def loadLine(self, line):
+		params = line.split('\t')
+		self.time = int(params[0])
+		self.volume = int(params[1])
+		self.price = float(params[2])
+		self.type = int(params[3])
+
+	def saveLine(self):
+		return '%d\t%d\t%.3f\t%d\n' % (self.time, self.volume, self.price, self.type)
