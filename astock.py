@@ -38,6 +38,8 @@ def loadStockList():
 			stockList.append('sz399001')
 		elif stockNumber == 'cy':
 			stockList.append('sz399006')
+		elif stockNumber == 'zx':
+			stockList.append('sz399005')
 	if len(stockList) == 0:
 		return False
 	return True
@@ -67,7 +69,7 @@ def requestStockData():
 	return ResultSuccess
 
 if len(sys.argv) < 2:
-	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，cy-创业板指')
+	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，zx-中小板指，cy-创业板指')
 elif loadStockList() == False:
 	print('没有有效的股票代码')
 else:
