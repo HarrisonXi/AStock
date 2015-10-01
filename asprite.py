@@ -6,7 +6,6 @@ import socket
 import re
 import time
 import threading
-import cPickle as pickle
 from aclass import *
 
 dateTime = 0
@@ -59,22 +58,30 @@ def requestTransData_(stockCode, count):
 
 def requestTransData(stockCode):
 	filePath = None
-	transList = []
+	transList = None
 	# 判断是不是已收盘，收盘会进入缓存判断逻辑
 	if dirPath is not None:
 		filePath = dirPath + stockCode
 		# 命中缓存，直接从文件读取
 		if os.path.isfile(filePath) == True:
-			cacheFile = open(filePath, 'rb')
-			transList = pickle.load(cacheFile)
+			cacheFile = open(filePath, 'r')
+			transList = []
+			lines = cacheFile.readlines()
+			for line in lines:
+				trans = Trans()
+				trans.loadLine(line)
+				transList.append(trans)
 			cacheFile.close()
 	# 如果没有命中缓存，从网络请求数据
-	if len(transList) == 0:
+	if transList is None:
 		# 已经收盘，拿到的数据顺带存进文件
 		if filePath is not None:
 			transList = requestTransData_(stockCode, 4800)
-			cacheFile = open(filePath, 'wb')
-			pickle.dump(transList, cacheFile, 2)
+			cacheFile = open(filePath, 'w')
+			lines = []
+			for trans in transList:
+				lines.append(trans.saveLine())
+			cacheFile.writelines(lines)
 			cacheFile.close()
 		# 直接请求部分数据
 		else:
