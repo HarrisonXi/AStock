@@ -20,9 +20,9 @@ def requestDateTime():
 	try:
 		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
-		return requestDateTime()
+		return False
 	except socket.timeout:
-		return requestDateTime()
+		return False
 	match = dateTimePattern.search(content)
 	dateTime = int(match.group(1).replace('-', '')) * 10000 + int(match.group(2).replace(':', ''))
 	return dateTime
@@ -32,9 +32,9 @@ def requestStockData(stockCode):
 	try:
 		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
-		return requestStockData(stockCode)
+		return False
 	except socket.timeout:
-		return requestStockData(stockCode)
+		return False
 	match = stockPattern.search(content)
 	stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4))
 	return stock
@@ -45,9 +45,9 @@ def requestTransData_(stockCode, count):
 	try:
 		content = urllib2.urlopen(url, timeout = 3).read()
 	except urllib2.URLError:
-		return requestTransData_(stockCode, count)
+		return False
 	except socket.timeout:
-		return requestTransData_(stockCode, count)
+		return False
 	transList = []
 	match = transPattern.search(content)
 	while match:
@@ -77,6 +77,8 @@ def requestTransData(stockCode):
 		# 已经收盘，拿到的数据顺带存进文件
 		if filePath is not None:
 			transList = requestTransData_(stockCode, 4800)
+			while transList == False:
+				transList = requestTransData_(stockCode, 4800)
 			cacheFile = open(filePath, 'w')
 			lines = []
 			for trans in transList:
@@ -86,6 +88,8 @@ def requestTransData(stockCode):
 		# 直接请求部分数据
 		else:
 			transList = requestTransData_(stockCode, 1200)
+			while transList == False:
+				transList = requestTransData_(stockCode, 1200)
 	filteredList = []
 	if len(transList) > 0:
 		validTime = transList[-1].time - 100
@@ -148,6 +152,8 @@ def checkStockData(stockCode, forceShow = False):
 					return
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
+		while stock == False:
+			stock = requestStockData(stockCode)
 		# 排除接近涨跌板的股票
 		if forceShow == False and (transList[-1].price > stock.yesterdayEnd * 1.09 or transList[-1].price < stock.yesterdayEnd * 0.91):
 			return
@@ -173,6 +179,8 @@ if len(sys.argv) > 1:
 else:
 	# 获取当前新浪服务器时间
 	dateTime = requestDateTime()
+	while dateTime == False:
+		dateTime = requestDateTime()
 	# 如果已经收盘，则准备好cache目录
 	if dateTime % 10000 > 1500:
 		dirPath = '%s/cache/%d/' % (sys.path[0], dateTime / 10000 % 1000000)
