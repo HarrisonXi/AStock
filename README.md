@@ -39,8 +39,9 @@ cy:创业板指
 
 ## 关于数据
 
-	数据来源于新浪财经，代码库里有整理好的API文档。
-	如果有兴趣用python做真正的数据分析，可以去参考[TuShare][2]库。
+数据来源于新浪财经，代码库里有整理好的API文档。
+如果有兴趣用python做真正的数据分析，可以去参考[TuShare开源库][2]，前往[TuShare主页][3]。
 
   [1]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output.png
-  [2]: http://pythonhosted.org/tushare/index.html
+  [2]: https://github.com/waditu/tushare
+  [3]: http://pythonhosted.org/tushare/index.html
