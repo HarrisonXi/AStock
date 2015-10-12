@@ -75,6 +75,7 @@ for thread in threadList:
 for thread in threadList:
 	thread.join()
 totalCount = greatUpCount + upCount + equalCount + downCount + greatDownCount
+localTime = time.localtime(startTime)
 print('大涨数量: %d') % (greatUpCount)
 print('小涨数量: %d') % (upCount)
 print('稳定数量: %d') % (equalCount)
@@ -83,4 +84,5 @@ print('大跌数量: %d') % (greatDownCount)
 print('平均涨幅: %.2f%%') % (increase / totalCount)
 print('停牌数量: %d') % (haltCount)
 print('总数量: %d') % (haltCount + totalCount)
+print('开始时间: %02d:%02d:%02d' % (localTime.tm_hour, localTime.tm_min, localTime.tm_sec))
 print('总用时: %.2f秒' % (time.time() - startTime))
