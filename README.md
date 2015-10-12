@@ -37,10 +37,30 @@ cy:创业板指
 
     python astock.py sh000001 sz399001
 
+## 统计脚本
+
+    python ahealth.py
+
+输出示例
+
+    大涨数量: 195
+    小涨数量: 1545
+    稳定数量: 188
+    小跌数量: 2
+    大跌数量: 10
+    平均涨幅: 3.70%
+    停牌数量: 354
+    总数量: 2294
+    开始时间: 10:46:01
+    总用时: 0.30秒
+
+不包含创业板股票，有需要的请自行添加。
+
 ## 关于数据
 
-	数据来源于新浪财经，代码库里有整理好的API文档。
-	如果有兴趣用python做真正的数据分析，可以去参考[TuShare][2]库。
+    数据来源于新浪财经，代码库里有整理好的API文档。
+    如果有兴趣用python做真正的数据分析，可以去参考[TuShare开源库][2]，前往[TuShare主页][3]。
 
   [1]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output.png
-  [2]: http://pythonhosted.org/tushare/index.html
+  [2]: https://github.com/waditu/tushare
+  [3]: http://pythonhosted.org/tushare/index.html
