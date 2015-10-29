@@ -97,3 +97,13 @@ class Trans:
 			self.type = 1
 		else:
 			self.type = 0
+
+class Kline:
+	def __init__(self, date, start, highest, lowest, end, volume, time = '00:00'):
+		self.date = int(date.replace('-', ''))
+		self.time = int(time[0:2] + time[3:5])
+		self.start = float(start)
+		self.end = float(end)
+		self.highest = float(highest)
+		self.lowest = float(lowest)
+		self.volume = int(volume)
