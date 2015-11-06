@@ -86,7 +86,8 @@ def requestTransData_(stockCode, count):
 	match = transPattern.search(content)
 	while match:
 		trans = Trans(match.group(1), match.group(2), match.group(3), match.group(4))
-		transList.insert(0, trans)
+		if trans.price > 0:
+			transList.insert(0, trans)
 		match = transPattern.search(content, match.end() + 1)
 	return transList
 
