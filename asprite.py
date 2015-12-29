@@ -14,7 +14,7 @@ threadLock = threading.Lock()
 dateTimePattern = re.compile(r',\d{2}(\d{2}-\d{2}-\d{2}),(\d{2}:\d{2}):\d{2},')
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
 transPattern = re.compile(r'new Array\(\'([\d:]+)\', \'(\d+)\', \'([\d\.]+)\', \'(DOWN|UP|EQUAL)\'\)')
-klinePattern = re.compile(r'\{day:\"([\d-]+)\",open:\"([\d.]+)\",high:\"([\d.]+)\",low:\"([\d.]+)\",close:\"([\d.]+)\",volume:\"(\d+)\"\}')
+klinePattern = re.compile(r'\{day:"([\d-]+)",open:"([\d.]+)",high:"([\d.]+)",low:"([\d.]+)",close:"([\d.]+)",volume:"(\d+)"\}')
 
 def requestDateTime_():
 	url = 'http://hq.sinajs.cn/list=sh000001'
@@ -50,6 +50,7 @@ def requestStockData(stockCode):
 	stock = requestStockData_(stockCode)
 	while stock == False:
 		stock = requestStockData_(stockCode)
+	return stock
 
 def requestKlineData_(stockCode, count):
 	url = 'http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=%s&scale=240&ma=no&datalen=%d' % (stockCode, count)
@@ -68,10 +69,10 @@ def requestKlineData_(stockCode, count):
 	return klineList
 
 def requestKlineData(stockCode, count):
-	result = requestKlineData_(stockCode, count)
-	while result == False:
-		result = requestKlineData_(stockCode, count)
-	return result
+	klineList = requestKlineData_(stockCode, count)
+	while klineList == False:
+		klineList = requestKlineData_(stockCode, count)
+	return klineList
 
 def requestTransData_(stockCode, count):
 	# 1小时最大数据量是1150左右，因为交易系统3秒撮合一次，所以理论最大值为1小时1200
@@ -86,7 +87,7 @@ def requestTransData_(stockCode, count):
 	match = transPattern.search(content)
 	while match:
 		trans = Trans(match.group(1), match.group(2), match.group(3), match.group(4))
-		if trans.price > 0:
+		if trans.price > 0 and trans.volume > 0:
 			transList.insert(0, trans)
 		match = transPattern.search(content, match.end() + 1)
 	return transList
