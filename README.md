@@ -56,10 +56,11 @@ cy:创业板指
 
 不包含创业板股票，有需要的请自行添加。
 
-## 关于数据
+## 关于
 
     数据来源于新浪财经，代码库里有整理好的API文档。
     如果有兴趣用python做真正的数据分析，可以去参考[TuShare开源库][2]，前往[TuShare主页][3]。
+    仅在Mac的python2.7环境下使用过，对其它平台的兼容没有测试过。
 
   [1]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output.png
   [2]: https://github.com/waditu/tushare
