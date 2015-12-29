@@ -8,8 +8,8 @@ import time
 import threading
 from aclass import *
 
-dateTime = 0
 dirPath = None
+todayPercent = 0
 threadLock = threading.Lock()
 dateTimePattern = re.compile(r',\d{2}(\d{2}-\d{2}-\d{2}),(\d{2}:\d{2}):\d{2},')
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
@@ -182,15 +182,40 @@ def threadFunction(stockList):
 	for stockCode in stockList:
 		checkStockData(stockCode)
 
+def calcTodayPercent(dateTime):
+	todayPercent = dateTime % 10000
+	if todayPercent >= 1500:
+		todayPercent = 240
+	elif todayPercent >= 1400:
+		todayPercent = todayPercent - 1400 + 180
+	elif todayPercent >= 1300:
+		todayPercent = todayPercent - 1300 + 120
+	elif todayPercent >= 1130:
+		todayPercent = 120
+	elif todayPercent >= 1100:
+		todayPercent = todayPercent - 1100 + 90
+	elif todayPercent >= 1000:
+		todayPercent = todayPercent - 1000 + 30
+	elif todayPercent >= 930:
+		todayPercent = todayPercent - 930
+	else:
+		todayPercent = 0
+	return todayPercent / 240.0
+
 if len(sys.argv) > 1:
 	# 指定股票代码
 	if len(sys.argv[1]) == 8 and (sys.argv[1].startswith('sh') or sys.argv[1].startswith('sz')) and sys.argv[1][2:8].decode().isdecimal():
+		# 获取当前新浪服务器时间
+		dateTime = requestDateTime()
+		todayPercent = calcTodayPercent(dateTime)
+		# 检查单条数据并显示结果
 		checkStockData(sys.argv[1], True)
 	else:
 		print('无效的股票代码')
 else:
 	# 获取当前新浪服务器时间
 	dateTime = requestDateTime()
+	todayPercent = calcTodayPercent(dateTime)
 	# 如果已经收盘，则准备好cache目录
 	if dateTime % 10000 > 1500:
 		dirPath = '%s/cache/%d/' % (sys.path[0], dateTime / 10000 % 1000000)
