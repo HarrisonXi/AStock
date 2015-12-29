@@ -164,28 +164,6 @@ def checkStockData(stockCode, forceShow = False):
 		rangee = (maxPrice - minPrice) / transList[0].price * 100
 		if forceShow == False and rangee < 1:
 			return
-		# 排除均价曾高过现价的股票
-		totalVolume = 0
-		totalMoney = 0.0
-		last5 = [Trans(), Trans(), Trans(), Trans(), Trans()]
-		for trans in transList:
-			totalVolume += trans.volume
-			totalMoney += trans.volume * trans.price
-			last5.pop()
-			last5.insert(0, trans)
-			# 此判断是为了排除第一个分钟内的误差太大导致的误杀
-			if trans.time >= 931 and trans.time > transList[0].time:
-				volume5 = 0
-				moeny5 = 0.0
-				for last in last5:
-					volume5 += last.volume
-					moeny5 += last.volume * last.price
-				price5 = moeny5 / volume5
-				averagePrice = totalMoney / totalVolume
-				# if forceShow == True:
-				# 	print('%2d:%2d %.3f %.3f %.3f%s%s' % (trans.time / 100, trans.time % 100, trans.price, price5, averagePrice, ' ~' if trans.price < averagePrice else '', ' -' if price5 < averagePrice else ''))
-				if forceShow == False and price5 > trans.price:
-					return
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
 		# 排除接近涨跌板的股票
@@ -197,7 +175,7 @@ def checkStockData(stockCode, forceShow = False):
 		stock.printStockData()
 		print('起价现价: %.3f ~ %.3f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
 		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
-		print('平均成本: %.3f 买卖比例: %.1f%%' % (averagePrice, buyVolume * 100.0 / sellVolume))
+		print('买卖比例: %.1f%%' % (buyVolume * 100.0 / sellVolume))
 		threadLock.release()
 
 def threadFunction(stockList):
