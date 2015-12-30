@@ -13,6 +13,7 @@ todayPercent = 0
 threadLock = threading.Lock()
 dateTimePattern = re.compile(r',\d{2}(\d{2}-\d{2}-\d{2}),(\d{2}:\d{2}):\d{2},')
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
+volumePattern = re.compile(r'var hq_str_s[hz]\d{6}="(([^,"]+),){8}([^,"]+),[^"]+";')
 transPattern = re.compile(r'new Array\(\'([\d:]+)\', \'(\d+)\', \'([\d\.]+)\', \'(DOWN|UP|EQUAL)\'\)')
 klinePattern = re.compile(r'\{day:"([\d-]+)",open:"([\d.]+)",high:"([\d.]+)",low:"([\d.]+)",close:"([\d.]+)",volume:"(\d+)"\}')
 
@@ -51,6 +52,24 @@ def requestStockData(stockCode):
 	while stock == False:
 		stock = requestStockData_(stockCode)
 	return stock
+
+def requestVolumnData_(stockCode):
+	url = 'http://hq.sinajs.cn/list=' + stockCode
+	try:
+		content = urllib2.urlopen(url, timeout = 3).read()
+	except urllib2.URLError:
+		return False
+	except socket.timeout:
+		return False
+	match = volumePattern.search(content)
+	volume = int(match.group(3))
+	return volume
+
+def requestVolumnData(stockCode):
+	volume = requestVolumnData_(stockCode)
+	while volume == False:
+		volume = requestVolumnData_(stockCode)
+	return volume
 
 def requestKlineData_(stockCode, count):
 	url = 'http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=%s&scale=240&ma=no&datalen=%d' % (stockCode, count)
