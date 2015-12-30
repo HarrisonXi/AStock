@@ -7,7 +7,7 @@ http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.ge
 
 数据：开盘价，最高价，最低价，收盘价，交易量（股）
 
-http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=240$ma=no&datalen=100
+http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=240&ma=no&datalen=100
 
 	{day:"2015-07-01",open:"18.330",high:"18.660",low:"18.060",close:"18.210",volume:"293674272"}
 	{day:"2015-07-02",open:"18.810",high:"19.180",low:"17.950",close:"18.650",volume:"524774688"}

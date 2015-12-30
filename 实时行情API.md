@@ -36,12 +36,6 @@ http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=
 
 尾部额外带了当日总买入股数和卖出股数
 
-http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_BillList.php?sort=ticktime&symbol=sh600036&num=10
-
-    bill_detail_list[1] = new Array('14:59:55', '85920', '18.590', 'DOWN');
-
-和上面接口返回数据基本一致，没有末尾的买入卖出股数，看上去有点延迟。
-
 #新浪财经资金进出API
 
 http://vip.stock.finance.sina.com.cn/quotes_service/api/jsonp.php/var%20moneyFlowData=/MoneyFlow.ssi_ssfx_flzjtj?daima=sh600036&gettime=1
