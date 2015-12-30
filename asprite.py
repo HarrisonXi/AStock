@@ -183,6 +183,27 @@ def checkStockData(stockCode, forceShow = False):
 		rangee = (maxPrice - minPrice) / transList[0].price * 100
 		if forceShow == False and rangee < 1:
 			return
+		if todayPercent < 1:
+			# 获取交易量
+			totalVolume = requestVolumnData(stockCode)
+			# 获取前5天K线
+			klineList = requestKlineData(stockCode, 5)
+			volum5 = 0
+			for kline in klineList:
+				volum5 += kline.volume
+			volumeRatio5 = totalVolume / todayPercent / (volum5 / 5)
+			volumeRatio1 = totalVolume / todayPercent / klineList[-1].volume
+		else:
+			# 获取含今天的6天K线
+			klineList = requestKlineData(stockCode, 6)
+			volum5 = 0
+			for kline in klineList[0:5]:
+				volum5 += kline.volume
+			volumeRatio5 = klineList[-1].volume / (volum5 / 5)
+			volumeRatio1 = klineList[-1].volume / klineList[-2].volume
+		# 排除5日量比不到1.1，单日量比不到1.3的股票
+		if forceShow == False and (volumeRatio5 < 1.1 or volumeRatio1) < 1.3:
+			return
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
 		# 排除接近涨跌板的股票
@@ -194,7 +215,7 @@ def checkStockData(stockCode, forceShow = False):
 		stock.printStockData()
 		print('起价现价: %.3f ~ %.3f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
 		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
-		print('买卖比例: %.1f%%' % (buyVolume * 100.0 / sellVolume))
+		print('买卖比例: %.0f%% 量比: %.2f(5) %.2f(1)' % (buyVolume * 100.0 / sellVolume, volumeRatio5, volumeRatio1))
 		threadLock.release()
 
 def threadFunction(stockList):
