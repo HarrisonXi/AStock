@@ -199,8 +199,8 @@ def checkStockData(stockCode, forceShow = False):
 			volum5 = 0
 			for kline in klineList[0:5]:
 				volum5 += kline.volume
-			volumeRatio5 = klineList[-1].volume / (volum5 / 5)
-			volumeRatio1 = klineList[-1].volume / klineList[-2].volume
+			volumeRatio5 = klineList[-1].volume * 1.0 / (volum5 / 5)
+			volumeRatio1 = klineList[-1].volume * 1.0 / klineList[-2].volume
 		# 排除5日量比不到1.1，单日量比不到1.3的股票
 		if forceShow == False and (volumeRatio5 < 1.1 or volumeRatio1) < 1.3:
 			return
