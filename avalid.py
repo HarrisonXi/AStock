@@ -36,7 +36,7 @@ def threadFunction(stockPrefix, start, end):
 # 多线循环筛选所有股票数据
 startTime = time.time()
 threadList = []
-for index in xrange(1, 2788, 100):
+for index in xrange(1, 2789, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
 for index in xrange(600000, 604000, 100):
