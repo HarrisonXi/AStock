@@ -17,7 +17,7 @@ lastTime = ''
 lastData = []
 
 def loadStockList():
-	for index in range(1,len(sys.argv)):
+	for index in range(1, len(sys.argv)):
 		stockNumber = sys.argv[index]
 		if len(stockNumber) == 8:
 			# 8位长度的代码必须以sh或者sz开头
@@ -36,10 +36,12 @@ def loadStockList():
 			stockList.append('sh000001')
 		elif stockNumber == 'sz':
 			stockList.append('sz399001')
-		elif stockNumber == 'cy':
-			stockList.append('sz399006')
 		elif stockNumber == 'zx':
 			stockList.append('sz399005')
+		elif stockNumber == 'cy':
+			stockList.append('sz399006')
+		elif stockNumber == '300':
+			stockList.append('sh000300')
 	if len(stockList) == 0:
 		return False
 	return True
@@ -69,7 +71,7 @@ def requestStockData():
 	return ResultSuccess
 
 if len(sys.argv) < 2:
-	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，zx-中小板指，cy-创业板指')
+	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，zx-中小板指，cy-创业板指，300-沪深300')
 elif loadStockList() == False:
 	print('没有有效的股票代码')
 else:
@@ -82,6 +84,7 @@ else:
 			time.sleep(5)
 		elif result == ResultTimeout:
 			print('超时重试')
+			time.sleep(1)
 		elif result == ResultNoChange:
 			time.sleep(5)
 		else:
