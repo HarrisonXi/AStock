@@ -13,7 +13,7 @@ upCount = 0
 equalCount = 0
 downCount = 0
 greatDownCount = 0
-increase = 0.0
+totalIncrease = 0.0
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
 
 def devideStockList(stockList):
@@ -30,7 +30,7 @@ def devideStockList(stockList):
 	global equalCount
 	global downCount
 	global greatDownCount
-	global increase
+	global totalIncrease
 	threadLock.acquire()
 	match = stockPattern.search(content)
 	while match:
@@ -38,7 +38,7 @@ def devideStockList(stockList):
 		if stock.todayStart == 0 or stock.yesterdayEnd == 0:
 			haltCount += 1
 		else:
-			increase += (stock.current - stock.yesterdayEnd) / stock.yesterdayEnd * 100
+			totalIncrease += (stock.current - stock.yesterdayEnd) / stock.yesterdayEnd * 100
 			if stock.current > stock.yesterdayEnd * 1.06:
 				greatUpCount += 1
 			elif stock.current > stock.yesterdayEnd * 1.02:
@@ -64,7 +64,7 @@ def threadFunction(stockPrefix, start, end):
 # 多线循环筛选所有股票数据
 startTime = time.time()
 threadList = []
-for index in xrange(1, 2789, 100):
+for index in xrange(1, 2794, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
 for index in xrange(600000, 604000, 100):
@@ -81,7 +81,7 @@ print('小涨数量: %d') % (upCount)
 print('稳定数量: %d') % (equalCount)
 print('小跌数量: %d') % (downCount)
 print('大跌数量: %d') % (greatDownCount)
-print('平均涨幅: %.2f%%') % (increase / totalCount)
+print('平均涨幅: %.2f%%') % (totalIncrease / totalCount)
 print('停牌数量: %d') % (haltCount)
 print('总数量: %d') % (haltCount + totalCount)
 print('开始时间: %02d:%02d:%02d' % (localTime.tm_hour, localTime.tm_min, localTime.tm_sec))
