@@ -8,8 +8,9 @@ import time
 import threading
 from aclass import *
 
-cachePath = None
-todayPercent = 0
+cachePath = None # 缓存文件夹的路径
+timePercent = 0 # 今天交易时间经过的百分比（例:午休-50%，14:00-75%）
+correctDate = 0 # 如果没有停牌复牌K线数据第一天的正确日期
 threadLock = threading.Lock()
 dateTimePattern = re.compile(r',\d{2}(\d{2}-\d{2}-\d{2}),(\d{2}:\d{2}):\d{2},')
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
@@ -82,7 +83,7 @@ def requestKlineData_(stockCode, count):
 	klineList = []
 	match = klinePattern.search(content)
 	while match:
-		kline = Kline(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6))
+		kline = Kline(match.group(2), match.group(3), match.group(4), match.group(5), match.group(6), match.group(1))
 		klineList.append(kline)
 		match = klinePattern.search(content, match.end() + 1)
 	return klineList
@@ -92,6 +93,13 @@ def requestKlineData(stockCode, count):
 	while klineList == False:
 		klineList = requestKlineData_(stockCode, count)
 	return klineList
+
+def requestCorrectDate():
+	if timePercent < 1:
+		klineList = requestKlineData('sh000001', 5)
+	else:
+		klineList = requestKlineData('sh000001', 6)
+	return klineList[0].date
 
 def requestTransData_(stockCode, count):
 	# 1小时最大数据量是1150左右，因为交易系统3秒撮合一次，所以理论最大值为1小时1200
@@ -116,7 +124,7 @@ def requestTransData(stockCode):
 	transList = None
 	# 判断是不是已收盘，收盘会进入缓存判断逻辑
 	if cachePath is not None:
-		filePath = cachePath + stockCode
+		filePath = os.path.join(cachePath, stockCode)
 		# 命中缓存，直接从文件读取
 		if os.path.isfile(filePath) == True:
 			cacheFile = open(filePath, 'r')
@@ -145,6 +153,7 @@ def requestTransData(stockCode):
 			transList = requestTransData_(stockCode, 1200)
 			while transList == False:
 				transList = requestTransData_(stockCode, 1200)
+	# 仅筛取一小时内的数据
 	filteredList = []
 	if len(transList) > 0:
 		validTime = transList[-1].time - 100
@@ -158,15 +167,16 @@ def checkStockData(stockCode, forceShow = False):
 	transList = requestTransData(stockCode)
 	# 检查数据，确定有数据的情况下进入筛选逻辑
 	if len(transList) > 0:
-		# 排除涨幅为负的股票
+		# 期间涨幅计算
 		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
-		if forceShow == False and increase < 0:
+		# 排除跌幅较大的股票
+		if forceShow == False and increase < -1:
 			return
 		# 基础数据的计算
-		buyVolume = 1
-		sellVolume = 1
-		maxPrice = 0.0
-		minPrice = 9999.0
+		buyVolume = 1 # 期间主动买总量
+		sellVolume = 1 # 期间主动卖总量
+		maxPrice = 0.0 # 期间最高价
+		minPrice = 9999.0 # 期间最低价
 		for trans in transList:
 			if trans.type > 0:
 				buyVolume += trans.volume
@@ -179,75 +189,89 @@ def checkStockData(stockCode, forceShow = False):
 		# 排除买盘比卖盘还少的股票
 		if forceShow == False and buyVolume < sellVolume:
 			return
-		# 排除振幅不到1%的股票
-		rangee = (maxPrice - minPrice) / transList[0].price * 100
-		if forceShow == False and rangee < 1:
-			return
-		if todayPercent < 1:
-			# 获取交易量
-			totalVolume = requestVolumnData(stockCode)
-			# 获取前5天K线
-			klineList = requestKlineData(stockCode, 5)
-			volum5 = 0
-			for kline in klineList:
-				volum5 += kline.volume
-			volumeRatio5 = totalVolume / todayPercent / (volum5 / 5)
-			volumeRatio1 = totalVolume / todayPercent / klineList[-1].volume
-		else:
-			# 获取含今天的6天K线
-			klineList = requestKlineData(stockCode, 6)
-			volum5 = 0
-			for kline in klineList[0:5]:
-				volum5 += kline.volume
-			volumeRatio5 = klineList[-1].volume * 1.0 / (volum5 / 5)
-			volumeRatio1 = klineList[-1].volume * 1.0 / klineList[-2].volume
-		# 排除5日量比不到1.1，单日量比不到1.3的股票
-		if forceShow == False and (volumeRatio5 < 1.1 or volumeRatio1) < 1.3:
+		# 期间振幅计算
+		swingRange = (maxPrice - minPrice) / transList[0].price * 100
+		# 排除振幅十分小的股票
+		if forceShow == False and swingRange < 0.5:
 			return
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
-		# 排除接近涨跌板的股票
-		if forceShow == False and (transList[-1].price > stock.yesterdayEnd * 1.09 or transList[-1].price < stock.yesterdayEnd * 0.91):
+		# 排除今日已接近涨停板或跌幅较大的股票
+		if forceShow == False and (transList[-1].price > stock.yesterdayEnd * 1.08 or transList[-1].price < stock.yesterdayEnd * 0.98):
 			return
+		# 获取K线数据
+		if timePercent < 1:
+			# 获取前5天K线
+			klineList = requestKlineData(stockCode, 5)
+			# 有复牌情况则排除
+			if forceShow == False and klineList[0].date != correctDate:
+				return
+			# 获取当前交易量，并计算成今日期望总交易量
+			totalVolume = requestVolumnData(stockCode)
+			totalVolume = totalVolume / timePercent
+			# 合成一个今天的假K线数据方便计算
+			kline = Kline()
+			kline.start = stock.todayStart
+			kline.end = stock.current
+			kline.volume = totalVolume
+			klineList.append(kline)
+		else:
+			# 获取含今天的6天K线
+			klineList = requestKlineData(stockCode, 6)
+			# 有复牌情况则排除
+			if forceShow == False and klineList[0].date != correctDate:
+				return
+			# 将最后一日的交易量处理成浮点数
+			klineList[-1].volume = klineList[-1].volume * 1.0
+		# 计算量比
+		volumeRatio5 = 0
+		volumeRatio1 = 0
+		if len(klineList) >= 6:
+			volume5 = 0
+			for kline in klineList[0:5]:
+				volume5 += kline.volume
+			volumeRatio5 = klineList[-1].volume * 5 / volume5
+		if len(klineList) >= 2:
+			volumeRatio1 = klineList[-1].volume / klineList[-2].volume
 		# 打印数据
 		threadLock.acquire()
 		print('==== ' + stockCode + ' ====')
 		stock.printStockData()
 		print('起价现价: %.3f ~ %.3f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
-		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, rangee))
-		print('买卖比例: %.0f%% 量比: %.2f(5) %.2f(1)' % (buyVolume * 100.0 / sellVolume, volumeRatio5, volumeRatio1))
+		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, swingRange))
+		print('买卖比例: %.2f%% 量比: %.2f(5) %.2f(1)' % (200.0 * buyVolume / (sellVolume + buyVolume) - 100.0, volumeRatio5, volumeRatio1))
 		threadLock.release()
 
 def threadFunction(stockList):
 	for stockCode in stockList:
 		checkStockData(stockCode)
 
-def calcTodayPercent(dateTime):
-	todayPercent = dateTime % 10000
-	if todayPercent >= 1500:
-		todayPercent = 240
-	elif todayPercent >= 1400:
-		todayPercent = todayPercent - 1400 + 180
-	elif todayPercent >= 1300:
-		todayPercent = todayPercent - 1300 + 120
-	elif todayPercent >= 1130:
-		todayPercent = 120
-	elif todayPercent >= 1100:
-		todayPercent = todayPercent - 1100 + 90
-	elif todayPercent >= 1000:
-		todayPercent = todayPercent - 1000 + 30
-	elif todayPercent >= 930:
-		todayPercent = todayPercent - 930
+def calcTimePercent(dateTime):
+	timePercent = dateTime % 10000
+	if timePercent >= 1500:
+		timePercent = 240
+	elif timePercent >= 1400:
+		timePercent = timePercent - 1400 + 180
+	elif timePercent >= 1300:
+		timePercent = timePercent - 1300 + 120
+	elif timePercent >= 1130:
+		timePercent = 120
+	elif timePercent >= 1100:
+		timePercent = timePercent - 1100 + 90
+	elif timePercent >= 1000:
+		timePercent = timePercent - 1000 + 30
+	elif timePercent >= 930:
+		timePercent = timePercent - 930
 	else:
-		todayPercent = 0
-	return todayPercent / 240.0
+		timePercent = 0
+	return timePercent / 240.0
 
 if len(sys.argv) > 1:
 	# 指定股票代码
 	if len(sys.argv[1]) == 8 and (sys.argv[1].startswith('sh') or sys.argv[1].startswith('sz')) and sys.argv[1][2:8].decode().isdecimal():
 		# 获取当前新浪服务器时间
 		dateTime = requestDateTime()
-		todayPercent = calcTodayPercent(dateTime)
+		timePercent = calcTimePercent(dateTime)
 		# 检查单条数据并显示结果
 		checkStockData(sys.argv[1], True)
 	else:
@@ -255,10 +279,13 @@ if len(sys.argv) > 1:
 else:
 	# 获取当前新浪服务器时间
 	dateTime = requestDateTime()
-	todayPercent = calcTodayPercent(dateTime)
+	timePercent = calcTimePercent(dateTime)
+	correctDate = requestCorrectDate()
 	# 如果已经收盘，则准备好cache目录
 	if dateTime % 10000 > 1500:
-		cachePath = '%s/cache/%d/' % (sys.path[0], dateTime / 10000 % 1000000)
+		cachePath = os.path.join(sys.path[0], 'cache')
+		dateStr = '%d' % (dateTime / 10000 % 1000000)
+		cachePath = os.path.join(cachePath, dateStr)
 		if os.path.isdir(cachePath) == False:
 			os.mkdir(cachePath)
 	# 多线循环筛选所有股票数据

@@ -20,12 +20,13 @@ def loadStockList():
 	for index in range(1, len(sys.argv)):
 		stockNumber = sys.argv[index]
 		if len(stockNumber) == 8:
-			# 8位长度的代码必须以sh或者sz开头
+			# 8位长度的代码必须以sh或者sz开头，后面6位是数字
 			if (stockNumber.startswith('sh') or stockNumber.startswith('sz')) and stockNumber[2:8].decode().isdecimal():
 				stockList.append(stockNumber)
 		elif len(stockNumber) == 6:
+			# 6位长度的代码必须全是数字
 			if stockNumber.decode().isdigit():
-				# 6位长度的0开头自动补sz，6开头补sh，3开头补sz
+				# 0开头自动补sz，6开头补sh，3开头补sz，否则无效
 				if stockNumber.startswith('0'):
 					stockList.append('sz' + stockNumber)
 				elif stockNumber.startswith('6'):
@@ -60,7 +61,7 @@ def requestStockData():
 	if match == None or match.group(1) == lastTime:
 		return ResultNoChange
 	lastTime = match.group(1)
-	# 循环抓取显示数据
+	# 抓取所有数据并计算
 	lastData[:] = []
 	match = stockPattern.search(content)
 	while match:

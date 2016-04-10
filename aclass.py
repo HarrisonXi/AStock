@@ -9,21 +9,21 @@ class Stock:
 		self.current = float(current)
 		self.highest = float(highest)
 		self.lowest = float(lowest)
-		self.buyPercent = 0.0
+		self.buyPercent = 0.0 # 买卖盘五档委比
 
 	def calcBuyPercent(self, volumes):
 		if len(volumes) < 10:
 			return
 		buyVolume = 0.0
 		for index in range(0, 5):
-			buyVolume += float(volumes[index])
+			buyVolume += int(volumes[index])
 		sellVolume = 0.0
 		for index in range(5, 10):
-			sellVolume += float(volumes[index])
+			sellVolume += int(volumes[index])
 		if buyVolume == 0 and sellVolume == 0:
 			self.buyPercent = 0.0
 		else:
-			self.buyPercent = buyVolume / (buyVolume + sellVolume) * 2 - 1;
+			self.buyPercent = 2.0 * buyVolume / (buyVolume + sellVolume) - 1.0;
 
 	def printStockData(self):
 		# 停牌处理
@@ -48,43 +48,43 @@ class Stock:
 			increaseStr = colored(increaseStr, 'red')
 		else:
 			increaseStr = '0.00%'
-		# 计算现价在今日振幅中的百分比位置
-		rangeStr = ''
-		percentStr = ''
+		# 计算振幅及现价在今日振幅中的百分比位置
+		swingRangeStr = ''
+		swingPercentStr = ''
 		if self.highest == 0 or self.lowest == 0:
 			pass
 		elif self.highest == self.lowest:
-			rangeStr = ' 0.00%'
+			swingRangeStr = ' 0.00%'
 			if self.current < self.yesterdayEnd:
-				percentStr = ' 0.0'
+				swingPercentStr = ' 0.0'
 			elif self.current > self.yesterdayEnd:
-				percentStr = ' 100.0'
+				swingPercentStr = ' 100.0'
 			else:
-				percentStr = ' 50.0'
+				swingPercentStr = ' 50.0'
 		else:
-			rangeStr = ' %.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
-			percentStr = ' %.1f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
-		# 给百分比数据着色
+			swingRangeStr = ' %.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
+			swingPercentStr = ' %.1f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
+		# 根据买卖盘委比给百分比数据着色
 		if self.buyPercent < 0.2 and self.buyPercent > -0.2:
 			pass
 		elif self.buyPercent >= 0.8:
-			percentStr = colored(percentStr + '+++', 'red')
+			swingPercentStr = colored(swingPercentStr + '+++', 'red')
 		elif self.buyPercent >= 0.6:
-			percentStr = colored(percentStr + '++', 'red')
+			swingPercentStr = colored(swingPercentStr + '++', 'red')
 		elif self.buyPercent >= 0.4:
-			percentStr = colored(percentStr + '+', 'red')
+			swingPercentStr = colored(swingPercentStr + '+', 'red')
 		elif self.buyPercent >= 0.2:
-			percentStr = colored(percentStr, 'red')
+			swingPercentStr = colored(swingPercentStr, 'red')
 		elif self.buyPercent <= -0.8: 
-			percentStr = colored(percentStr + '---', 'green')
+			swingPercentStr = colored(swingPercentStr + '---', 'green')
 		elif self.buyPercent <= -0.6: 
-			percentStr = colored(percentStr + '--', 'green')
+			swingPercentStr = colored(swingPercentStr + '--', 'green')
 		elif self.buyPercent <= -0.4: 
-			percentStr = colored(percentStr + '-', 'green')
+			swingPercentStr = colored(swingPercentStr + '-', 'green')
 		elif self.buyPercent <= -0.2: 
-			percentStr = colored(percentStr, 'green')
+			swingPercentStr = colored(swingPercentStr, 'green')
 		# 打印结果
-		print('%s: %s %s%s%s' % (self.name, priceStr, increaseStr, rangeStr, percentStr))
+		print('%s: %s %s%s%s' % (self.name, priceStr, increaseStr, swingRangeStr, swingPercentStr))
 
 class Trans:
 	def __init__(self, time = '00:00', volume = '0', price = '0', type = 'EQUAL'):
@@ -109,7 +109,7 @@ class Trans:
 		return '%d\t%d\t%.3f\t%d\n' % (self.time, self.volume, self.price, self.type)
 
 class Kline:
-	def __init__(self, date, start, highest, lowest, end, volume, time = '00:00'):
+	def __init__(self, start = '0', highest = '0', lowest = '0', end = '0', volume = '0', date = '0', time = '00:00'):
 		self.date = int(date.replace('-', ''))
 		self.time = int(time[0:2] + time[3:5])
 		self.start = float(start)
