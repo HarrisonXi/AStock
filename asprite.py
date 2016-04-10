@@ -233,6 +233,18 @@ def checkStockData(stockCode, forceShow = False):
 			volumeRatio5 = klineList[-1].volume * 5 / volume5
 		if len(klineList) >= 2:
 			volumeRatio1 = klineList[-1].volume / klineList[-2].volume
+		# 计算K线得分
+		klineScore = 0
+		for index1 in range(0, 5):
+			score1 = klineList[index1].volume if klineList[index1].end > klineList[index1].start else -klineList[index1].volume
+			for index2 in range(index1 + 1, 6):
+				score2 = klineList[index2].volume if klineList[index2].end > klineList[index2].start else -klineList[index2].volume
+				if score2 > score1:
+					klineScore = klineScore + 1
+				if forceShow == True:
+					print('%d: %d ~ %d: %d -> score: %d' % (index1, score1, index2, score2, klineScore))
+		if forceShow == False and klineScore <= 10:
+			return
 		# 打印数据
 		threadLock.acquire()
 		print('==== ' + stockCode + ' ====')
@@ -240,6 +252,7 @@ def checkStockData(stockCode, forceShow = False):
 		print('起价现价: %.3f ~ %.3f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
 		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, swingRange))
 		print('买卖比例: %.2f%% 量比: %.2f(5) %.2f(1)' % (200.0 * buyVolume / (sellVolume + buyVolume) - 100.0, volumeRatio5, volumeRatio1))
+		print('量价得分: %d' % (klineScore))
 		threadLock.release()
 
 def threadFunction(stockList):
