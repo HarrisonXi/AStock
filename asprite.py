@@ -233,6 +233,9 @@ def checkStockData(stockCode, forceShow = False):
 			volumeRatio5 = klineList[-1].volume * 5 / volume5
 		if len(klineList) >= 2:
 			volumeRatio1 = klineList[-1].volume / klineList[-2].volume
+		# 排除单日量比无爆发的股票
+		if forceShow == False and volumeRatio1 < 1.2:
+			return
 		# 计算K线得分
 		klineScore = 0
 		for index1 in range(0, 5):
@@ -243,7 +246,7 @@ def checkStockData(stockCode, forceShow = False):
 					klineScore = klineScore + 1
 				if forceShow == True:
 					print('%d: %d ~ %d: %d -> score: %d' % (index1, score1, index2, score2, klineScore))
-		if forceShow == False and klineScore <= 10:
+		if forceShow == False and klineScore <= 12:
 			return
 		# 打印数据
 		threadLock.acquire()
