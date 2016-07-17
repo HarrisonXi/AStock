@@ -170,7 +170,7 @@ def checkStockData(stockCode, forceShow = False):
 		# 期间涨幅计算
 		increase = (transList[-1].price - transList[0].price) / transList[0].price * 100
 		# 排除跌幅较大的股票
-		if forceShow == False and increase < -1:
+		if forceShow == False and increase < -2:
 			return
 		# 基础数据的计算
 		buyVolume = 1 # 期间主动买总量
@@ -192,12 +192,12 @@ def checkStockData(stockCode, forceShow = False):
 		# 期间振幅计算
 		swingRange = (maxPrice - minPrice) / transList[0].price * 100
 		# 排除振幅十分小的股票
-		if forceShow == False and swingRange < 0.5:
+		if forceShow == False and swingRange < 1:
 			return
 		# 获得股票名称等数据
 		stock = requestStockData(stockCode)
-		# 排除今日已接近涨停板或跌幅较大的股票
-		if forceShow == False and (transList[-1].price > stock.yesterdayEnd * 1.08 or transList[-1].price < stock.yesterdayEnd * 0.98):
+		# 排除今日跌幅较大的股票
+		if forceShow == False and transList[-1].price < stock.yesterdayEnd * 0.97:
 			return
 		# 获取K线数据
 		if timePercent < 1:
@@ -250,7 +250,7 @@ def checkStockData(stockCode, forceShow = False):
 			return
 		# 打印数据
 		threadLock.acquire()
-		print('==== ' + stockCode + ' ====')
+		print('==== ' + stockCode[2:] + ' ====')
 		stock.printStockData()
 		print('起价现价: %.3f ~ %.3f 涨幅: %.2f%%' % (transList[0].price, transList[-1].price, increase))
 		print('最低最高: %.3f ~ %.3f 振幅: %.2f%%' % (minPrice, maxPrice, swingRange))
