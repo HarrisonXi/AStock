@@ -6,8 +6,11 @@ import time
 import threading
 
 threadLock = threading.Lock()
-validStockList = []
 validPattern = re.compile(r'var hq_str_(s[hz]\d{6})="[^,"]+,[^,"]+,[^,"]+,[^,"]+,[^"]+";')
+# 确认存在的3个特殊股票代码
+validStockList = ["sz001696","sz001896","sz001979"]
+# 2016年7月才上市的股票代码
+newStockList = ["sz002803","sz002805","sz002806","sz002807","sz002808","sh600919","sh600936","sh600977","sh601595","sh601811","sh601966","sh601997","sh603007","sh603016","sh603069","sh603159","sh603322","sh603515","sh603569","sh603663","sh603843","sh603986"]
 
 def filterStockList(stockList):
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
@@ -39,7 +42,7 @@ threadList = []
 for index in xrange(1, 1000, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
-for index in xrange(2001, 2807, 100):
+for index in xrange(2001, 2809, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
 for index in xrange(600000, 602000, 100):
@@ -52,6 +55,9 @@ for thread in threadList:
 	thread.start()
 for thread in threadList:
 	thread.join()
+for stockCode in newStockList:
+	if stockCode in validStockList:
+		validStockList.remove(stockCode)
 validStockList.sort()
 print("['" + "','".join(validStockList) + "']")
 print('总数量: %d' % (len(validStockList)))
