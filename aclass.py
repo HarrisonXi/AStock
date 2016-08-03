@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import re
 from termcolor import colored
+
+asciiPattern = re.compile(r'[A-Z* ]')
 
 class Stock:
 	def __init__(self, name, todayStart, yesterdayEnd, current, highest = '0', lowest = '0'):
@@ -26,65 +29,55 @@ class Stock:
 			self.buyPercent = 2.0 * buyVolume / (buyVolume + sellVolume) - 1.0;
 
 	def printStockData(self):
+		# 名称处理对齐
+		asciiCount = len(asciiPattern.findall(self.name))
+		nameWidth = (len(self.name) - asciiCount) / 3 * 2 + asciiCount
+		nameStr = ' ' * (8 - nameWidth) + self.name
 		# 停牌处理
 		if self.todayStart == 0 or self.yesterdayEnd == 0:
-			print('%s: 停牌' % (self.name))
+			print('%s: 停牌' % (nameStr))
 			return
 		# 计算现价显示的小数点位数
 		if self.current < 10:
-			priceStr = '%.3f' % self.current
+			priceStr = '%6.3f' % self.current
 		elif self.current < 100:
-			priceStr = '%.2f' % self.current
+			priceStr = '%6.2f' % self.current
 		elif self.current < 1000:
-			priceStr = '%.1f' % self.current
+			priceStr = '%6.1f' % self.current
 		else:
-			priceStr = '%.0f' % self.current
+			priceStr = '%6.0f' % self.current
 		# 计算今日的涨跌幅
 		if self.current < self.yesterdayEnd:
-			increaseStr = '-%.2f%%' % ((self.yesterdayEnd - self.current) / self.yesterdayEnd * 100)
+			increaseStr = '%+6.2f%%' % ((self.yesterdayEnd - self.current) / self.yesterdayEnd * 100)
 			increaseStr = colored(increaseStr, 'green')
 		elif self.current > self.yesterdayEnd:
-			increaseStr = '+%.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
+			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
 			increaseStr = colored(increaseStr, 'red')
 		else:
-			increaseStr = '0.00%'
+			increaseStr = '  0.00%'
 		# 计算振幅及现价在今日振幅中的百分比位置
 		swingRangeStr = ''
 		swingPercentStr = ''
-		if self.highest == 0 or self.lowest == 0:
-			pass
-		elif self.highest == self.lowest:
-			swingRangeStr = ' 0.00%'
-			if self.current < self.yesterdayEnd:
-				swingPercentStr = ' 0.0'
-			elif self.current > self.yesterdayEnd:
-				swingPercentStr = ' 100.0'
+		if self.highest > 0 and self.lowest > 0:
+			if self.highest == self.lowest:
+				swingRangeStr = ' 0.00%'
+				if self.current < self.yesterdayEnd:
+					swingPercentStr = '  0'
+				elif self.current > self.yesterdayEnd:
+					swingPercentStr = '100'
+				else:
+					swingPercentStr = ' 50'
 			else:
-				swingPercentStr = ' 50.0'
+				swingRangeStr = '%5.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
+				swingPercentStr = '%3.0f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
+		# 根据买卖盘委比给百分比数据加标记
+		buyPercentStr = ''
+		if self.buyPercent > 0:
+			buyPercentStr = colored('+' * int(self.buyPercent * 5.99), 'red')
 		else:
-			swingRangeStr = ' %.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
-			swingPercentStr = ' %.1f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
-		# 根据买卖盘委比给百分比数据着色
-		if self.buyPercent < 0.2 and self.buyPercent > -0.2:
-			pass
-		elif self.buyPercent >= 0.8:
-			swingPercentStr = colored(swingPercentStr + '+++', 'red')
-		elif self.buyPercent >= 0.6:
-			swingPercentStr = colored(swingPercentStr + '++', 'red')
-		elif self.buyPercent >= 0.4:
-			swingPercentStr = colored(swingPercentStr + '+', 'red')
-		elif self.buyPercent >= 0.2:
-			swingPercentStr = colored(swingPercentStr, 'red')
-		elif self.buyPercent <= -0.8: 
-			swingPercentStr = colored(swingPercentStr + '---', 'green')
-		elif self.buyPercent <= -0.6: 
-			swingPercentStr = colored(swingPercentStr + '--', 'green')
-		elif self.buyPercent <= -0.4: 
-			swingPercentStr = colored(swingPercentStr + '-', 'green')
-		elif self.buyPercent <= -0.2: 
-			swingPercentStr = colored(swingPercentStr, 'green')
+			buyPercentStr = colored('-' * int(self.buyPercent * -5.99), 'green')
 		# 打印结果
-		print('%s: %s %s%s%s' % (self.name, priceStr, increaseStr, swingRangeStr, swingPercentStr))
+		print('%s: %s %s %s %s %s' % (nameStr, priceStr, increaseStr, swingRangeStr, swingPercentStr, buyPercentStr))
 
 class Trans:
 	def __init__(self, time = '00:00', volume = '0', price = '0', type = 'EQUAL'):
