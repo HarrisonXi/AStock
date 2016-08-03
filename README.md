@@ -50,16 +50,7 @@ cy: 创业板指
 
 输出示例
 
-    大涨数量: 195
-    小涨数量: 1545
-    稳定数量: 188
-    小跌数量: 2
-    大跌数量: 10
-    平均涨幅: 3.70%
-    停牌数量: 354
-    总数量: 2294
-    开始时间: 10:46:01
-    总用时: 0.30秒
+![输出示例][4]
 
 不包含创业板股票，有需要的请自行添加。
 
@@ -71,6 +62,7 @@ cy: 创业板指
 
 仅在 Mac 的 python 2.7 环境下使用过，对其它平台的兼容没有测试过。
 
-  [1]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output.png
+  [1]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output1.png
   [2]: https://github.com/waditu/tushare
   [3]: http://pythonhosted.org/tushare/index.html
+  [4]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output2.png
