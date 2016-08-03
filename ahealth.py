@@ -9,7 +9,7 @@ from termcolor import colored
 
 threadLock = threading.Lock()
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
-distributionCount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # 15个对应的分布数量
+distributionCount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # 20个对应的分布数量
 distributionMaximum = 0
 totalIncrease = 0.0
 totalCount = 0
@@ -33,7 +33,11 @@ def devideStockList(stockList):
 			increase = (stock.current - stock.yesterdayEnd) / stock.yesterdayEnd * 100
 			totalIncrease += increase
 			totalCount += 1
-			increase = int((10.2 - increase) / 1.36) # 10.2 * 2 = 15 * 1.36
+			if increase >= 10:
+				increase = 9.99
+			elif increase <= -10:
+				increase = -9.99
+			increase = int(10 - increase)
 			distributionCount[increase] = distributionCount[increase] + 1
 			if distributionMaximum < distributionCount[increase]:
 				distributionMaximum = distributionCount[increase]
@@ -59,11 +63,11 @@ for thread in threadList:
 for thread in threadList:
 	thread.join()
 print('涨幅分布:')
-for increase in xrange(0, 15):
+for increase in xrange(0, 20):
 	distributionStr = '%4d %s' % (distributionCount[increase], '*' * (distributionCount[increase] * 75 / distributionMaximum))
-	if increase < 7:
+	if increase < 9:
 		distributionStr = colored(distributionStr, 'red')
-	elif increase > 7:
+	elif increase > 10:
 		distributionStr = colored(distributionStr, 'green')
 	print(distributionStr)
 print('平均涨幅: %.2f%%') % (totalIncrease / totalCount)
