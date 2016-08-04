@@ -102,9 +102,13 @@ class Trans:
 		return '%d\t%d\t%.2f\t%d\n' % (self.time, self.volume, self.price, self.type)
 
 class Kline:
-	def __init__(self, start = '0', highest = '0', lowest = '0', end = '0', volume = '0', date = '0', time = '00:00'):
-		self.date = int(date.replace('-', ''))
-		self.time = int(time[0:2] + time[3:5])
+	def __init__(self, start, highest, lowest, end, volume, dateTime = '1970-01-01 00:00:00'):
+		params = dateTime.split(' ')
+		self.date = int(params[0].replace('-', '')[-6:])
+		if len(params) > 1:
+			self.time = int(params[1].replace(':', '')[0:4])
+		else:
+			self.time = 1500
 		self.start = float(start)
 		self.end = float(end)
 		self.highest = float(highest)
