@@ -48,7 +48,7 @@ class Stock:
 			priceStr = '%6.0f' % self.current
 		# 计算今日的涨跌幅
 		if self.current < self.yesterdayEnd:
-			increaseStr = '%+6.2f%%' % ((self.yesterdayEnd - self.current) / self.yesterdayEnd * 100)
+			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
 			increaseStr = colored(increaseStr, 'green')
 		elif self.current > self.yesterdayEnd:
 			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
