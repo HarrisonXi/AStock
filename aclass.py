@@ -99,7 +99,7 @@ class Trans:
 		self.type = int(params[3])
 
 	def saveLine(self):
-		return '%d\t%d\t%.3f\t%d\n' % (self.time, self.volume, self.price, self.type)
+		return '%d\t%d\t%.2f\t%d\n' % (self.time, self.volume, self.price, self.type)
 
 class Kline:
 	def __init__(self, start = '0', highest = '0', lowest = '0', end = '0', volume = '0', date = '0', time = '00:00'):

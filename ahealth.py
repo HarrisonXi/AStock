@@ -33,9 +33,9 @@ def devideStockList(stockList):
 			increase = (stock.current - stock.yesterdayEnd) / stock.yesterdayEnd * 100
 			totalIncrease += increase
 			totalCount += 1
-			if increase >= 10:
+			if increase >= 10.0:
 				increase = 9.99
-			elif increase <= -10:
+			elif increase <= -10.0:
 				increase = -9.99
 			increase = int(10 - increase)
 			distributionCount[increase] = distributionCount[increase] + 1
