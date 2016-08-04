@@ -9,6 +9,7 @@ from aclass import *
 ResultSuccess = 0
 ResultTimeout = 1
 ResultNoChange = 2
+ResultUnknown = 3
 
 stockList = []
 timePattern = re.compile(r',(\d+:\d+:\d+),')
@@ -58,7 +59,9 @@ def requestStockData():
 	# 判断数据时间有没有更新
 	global lastTime
 	match = timePattern.search(content)
-	if match == None or match.group(1) == lastTime:
+	if match == None:
+		return ResultUnknown
+	elif match.group(1) == lastTime:
 		return ResultNoChange
 	lastTime = match.group(1)
 	# 抓取所有数据并计算
@@ -69,6 +72,8 @@ def requestStockData():
 		stock.calcBuyPercent([match.group(7), match.group(8), match.group(9), match.group(10), match.group(11), match.group(12), match.group(13), match.group(14), match.group(15), match.group(16)]);
 		lastData.append(stock)
 		match = stockPattern.search(content, match.end() + 1)
+	if len(lastData) == 0:
+		return ResultUnknown
 	return ResultSuccess
 
 if len(sys.argv) < 2:
