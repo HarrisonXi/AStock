@@ -70,8 +70,10 @@ def requestStockData_(stockCode):
 		return False
 	except socket.timeout:
 		return False
+	stock = None
 	match = stockPattern.search(content)
-	stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6))
+	if match:
+		stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6))
 	return stock
 
 def requestStockData(stockCode):
@@ -88,8 +90,10 @@ def requestVolumnData_(stockCode):
 		return False
 	except socket.timeout:
 		return False
+	volume = 0
 	match = volumePattern.search(content)
-	volume = int(match.group(3))
+	if match:
+		volume = int(match.group(3))
 	return volume
 
 def requestVolumnData(stockCode):
@@ -195,6 +199,12 @@ def cacheTransData(stockCode):
 def checkStockData(stockCode):
 	# 获得股票名称等数据
 	stock = requestStockData(stockCode)
+	# 排序无效股票并提示
+	if stock == None:
+		threadLock.acquire()
+		print('==== ' + stockCode[2:] + ' ====')
+		print('无效代码')
+		threadLock.release()
 	# 排除停牌股票
 	if stock.todayStart == 0 or stock.yesterdayEnd == 0:
 		return
