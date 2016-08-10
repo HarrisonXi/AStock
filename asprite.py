@@ -125,11 +125,11 @@ def requestKlineData(stockCode, count, scale = 240):
 	return klineList
 
 def requestCorrectDate():
-	if timePercent < 1:
-		klineList = requestKlineData('sh000001', 5)
+	klineList = requestKlineData('sh000001', 6)
+	if klineList[-1].date == dateTime / 10000 % 1000000:
+		return klineList[0].date
 	else:
-		klineList = requestKlineData('sh000001', 6)
-	return klineList[0].date
+		return klineList[1].date
 
 def requestTransData_(stockCode, count):
 	# 1小时最大数据量是1150左右，因为交易系统3秒撮合一次，所以理论最大值为1小时1200
@@ -212,24 +212,20 @@ def checkStockData(stockCode):
 	if testMode == False and stock.current < stock.yesterdayEnd * 0.97:
 		return
 	# 获取K线数据
-	if timePercent < 1:
-		# 获取前5天K线
-		klineList = requestKlineData(stockCode, 5)
-		# 有复牌情况则排除
-		if klineList[0].date != correctDate:
-			return
+	klineList = requestKlineData(stockCode, 6)
+	if klineList[-1].date != dateTime / 10000 % 1000000:
+		del klineList[0]
+	# 有复牌情况则排除
+	if klineList[0].date != correctDate:
+		return
+	# 如果今日数据没有拉取到需要手动计算补全
+	if len(klineList) < 6:
 		# 获取当前交易量，并计算成今日期望总交易量
 		totalVolume = requestVolumnData(stockCode)
 		totalVolume = int(totalVolume / timePercent)
 		# 合成一个今天的假K线数据方便计算
 		kline = Kline(stock.todayStart, stock.highest, stock.lowest, stock.current, totalVolume)
 		klineList.append(kline)
-	else:
-		# 获取含今天的6天K线
-		klineList = requestKlineData(stockCode, 6)
-		# 有复牌情况则排除
-		if klineList[0].date != correctDate:
-			return
 	# 计算量比
 	volumeRatio5 = 0
 	volumeRatio1 = 0
