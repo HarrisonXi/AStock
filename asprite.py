@@ -226,9 +226,11 @@ def checkStockData(stockCode):
 		# 合成一个今天的假K线数据方便计算
 		kline = Kline(stock.todayStart, stock.highest, stock.lowest, stock.current, totalVolume)
 		klineList.append(kline)
+	# 有复权情况则排除
+	for index in range(0, 5):
+		if klineList[index + 1].lowest < klineList[index].end * 0.89:
+			return
 	# 计算量比
-	volumeRatio5 = 0
-	volumeRatio1 = 0
 	volume5 = 0
 	for kline in klineList[0:5]:
 		volume5 += kline.volume
