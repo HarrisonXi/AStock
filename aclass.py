@@ -35,7 +35,7 @@ class Stock:
 		nameStr = ' ' * (8 - nameWidth) + self.name
 		# 停牌处理
 		if self.todayStart == 0 or self.yesterdayEnd == 0:
-			print('%s: 停牌' % (nameStr))
+			print('%s:   停牌' % (nameStr))
 			return
 		# 计算现价显示的小数点位数
 		if self.current < 10:
