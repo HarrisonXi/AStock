@@ -27,7 +27,7 @@ http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.ge
 
 关于复权数据，以龙力生物2015年6月5日复权为例，当日该股下跌2.26%
 
-http://finance.sina.com.cn/realstock/newcompany/sz002604/phfq.js?_=14
+http://finance.sina.com.cn/realstock/newcompany/sz002604/phfq.js
 
 	_2015_06_05:"52.5870",
 	_2015_06_04:"53.8027",
