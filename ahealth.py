@@ -25,7 +25,6 @@ def devideStockList(stockList):
 		return False
 	global totalIncrease
 	global totalCount
-	global distributionMaximum
 	threadLock.acquire()
 	match = stockPattern.search(content)
 	while match:
@@ -40,8 +39,6 @@ def devideStockList(stockList):
 				increase = -9.99
 			increase = int(10 - increase)
 			distributionCount[increase] = distributionCount[increase] + 1
-			if distributionMaximum < distributionCount[increase]:
-				distributionMaximum = distributionCount[increase]
 		match = stockPattern.search(content, match.end() + 1)
 	threadLock.release()
 	return True
@@ -70,14 +67,17 @@ for thread in threadList:
 	thread.join()
 print('涨幅分布:')
 for increase in xrange(0, 20):
-	distributionStr = '%4d %s' % (distributionCount[increase], '*' * (distributionCount[increase] * 75 / distributionMaximum))
-	if increase < 9:
+	if distributionMaximum < distributionCount[increase]:
+		distributionMaximum = distributionCount[increase]
+for increase in xrange(0, 20):
+	distributionStr = '%4d %s' % (distributionCount[increase], '*' * (distributionCount[increase] * 70 / distributionMaximum))
+	if increase < 8:
 		distributionStr = colored(distributionStr, 'red')
-	elif increase > 10:
+	elif increase > 11:
 		distributionStr = colored(distributionStr, 'green')
 	print(distributionStr)
 print('平均涨幅: %.2f%%') % (totalIncrease / totalCount)
 print('开盘数量: %d') % (totalCount)
 localTime = time.localtime(startTime)
-print('开始时间: %02d:%02d:%02d' % (localTime.tm_hour, localTime.tm_min, localTime.tm_sec))
+print('运行时间: %02d:%02d:%02d' % (localTime.tm_hour, localTime.tm_min, localTime.tm_sec))
 print('总 用 时: %.2f秒' % (time.time() - startTime))
