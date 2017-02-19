@@ -1,6 +1,6 @@
 # 新浪财经实时行情API
 
-## 实时数据
+### 实时数据
 
 http://hq.sinajs.cn/list=sh000001
 
@@ -18,7 +18,7 @@ http://hq.sinajs.cn/list=sz000001
 
 支持多个查询逗号隔开，例如：http://hq.sinajs.cn/list=sh603019,sz002024
 
-## 分时数据
+### 分时数据
 
 http://vip.stock.finance.sina.com.cn/quotes_service/view/vML_DataList.php?asc=j&symbol=sh600036&num=10
 
@@ -26,7 +26,7 @@ http://vip.stock.finance.sina.com.cn/quotes_service/view/vML_DataList.php?asc=j&
 
 数据：时间，价格，成交量（股）
 
-## 逐比交易明细数据
+### 逐比交易明细数据
 
 http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=10&symbol=sh600036
 

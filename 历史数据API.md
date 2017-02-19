@@ -1,6 +1,6 @@
 # 新浪财经历史数据API
 
-## K线数据
+### K线数据
 
 http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=60&ma=no&datalen=100
 
@@ -23,7 +23,7 @@ http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.ge
 
 然后去掉ma=no参数还可以获得5、10和30日均价均值
 
-## 复权数据
+### 复权数据
 
 关于复权数据，以龙力生物2015年6月5日复权为例，当日该股下跌2.26%
 
