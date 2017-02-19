@@ -77,7 +77,9 @@ def requestStockData():
 	return ResultSuccess
 
 if len(sys.argv) < 2:
-	print('使用示例: python astock.py sh600000 sz000001\n自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz\n特殊代码：sh-上证指数，sz-深证指数，zx-中小板指，cy-创业板指，300-沪深300')
+	print('使用示例: python astock.py sh600000 sz000001')
+	print('自动补全：6字头股票代码脚本会自动补sh前缀，0字头和3字头补sz')
+	print('特殊代码：sh-上证指数，sz-深证指数，zx-中小板指，cy-创业板指，300-沪深300')
 elif loadStockList() == False:
 	print('没有有效的股票代码')
 else:
@@ -87,12 +89,21 @@ else:
 			print(lastTime)
 			for stock in lastData:
 				stock.printStockData()
-			time.sleep(5)
+			time.sleep(10)
 		elif result == ResultTimeout:
 			print('超时重试')
-			time.sleep(1)
+			time.sleep(2.5)
 		elif result == ResultNoChange:
-			time.sleep(5)
+			timeValue = int(lastTime.replace(':', '')[0:4])
+			if timeValue > 1130 and timeValue < 1255:
+				time.sleep(180)
+			elif timeValue < 925:
+				time.sleep(180)
+			elif timeValue > 1500:
+				print('已经休市')
+				break
+			else:
+				time.sleep(5)
 		else:
 			print('未知错误')
 			break
