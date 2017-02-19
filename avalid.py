@@ -59,7 +59,7 @@ for stockCode in newStockList:
 	if stockCode in validStockList:
 		validStockList.remove(stockCode)
 validStockList.sort()
-validStockFile = open('stock.list', 'w')
+validStockFile = open(os.path.join(sys.path[0], 'stock.list'), 'w')
 validStockFile.write('\n'.join(validStockList))
 validStockFile.close()
 print('总数量: %d' % (len(validStockList)))
