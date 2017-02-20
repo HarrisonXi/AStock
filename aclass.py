@@ -47,14 +47,14 @@ class Stock:
 		else:
 			priceStr = '%6.0f' % self.current
 		# 计算今日的涨跌幅
-		if self.current < self.yesterdayEnd:
-			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
-			increaseStr = colored(increaseStr, 'green')
-		elif self.current > self.yesterdayEnd:
-			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
-			increaseStr = colored(increaseStr, 'red')
-		else:
+		if self.current == self.yesterdayEnd:
 			increaseStr = '  0.00%'
+		else:
+			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
+			if self.current < self.yesterdayEnd:
+				increaseStr = colored(increaseStr, 'green')
+			else:
+				increaseStr = colored(increaseStr, 'red')
 		# 计算振幅及现价在今日振幅中的百分比位置
 		swingRangeStr = ''
 		swingPercentStr = ''
@@ -72,7 +72,7 @@ class Stock:
 				swingPercentStr = '%3.0f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
 		# 根据买卖盘委比给百分比数据加标记
 		buyPercentStr = ''
-		if self.buyPercent > 0:
+		if self.buyPercent >= 0:
 			buyPercentStr = colored('+' * int(self.buyPercent * 5.99), 'red')
 		else:
 			buyPercentStr = colored('-' * int(self.buyPercent * -5.99), 'green')
