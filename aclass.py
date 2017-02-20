@@ -4,6 +4,7 @@ from termcolor import colored
 
 asciiPattern = re.compile(r'[A-Z* ]')
 
+# 实时数据Class
 class Stock:
 	def __init__(self, name, todayStart, yesterdayEnd, current, highest = '0', lowest = '0'):
 		self.name = name.decode('gbk').encode('utf-8')
@@ -14,6 +15,7 @@ class Stock:
 		self.lowest = float(lowest)
 		self.buyPercent = 0.0 # 买卖盘五档委比
 
+	# 计算买卖委比
 	def calcBuyPercent(self, volumes):
 		if len(volumes) < 10:
 			return
@@ -28,14 +30,21 @@ class Stock:
 		else:
 			self.buyPercent = 2.0 * buyVolume / (buyVolume + sellVolume) - 1.0;
 
-	def printStockData(self):
-		# 名称处理对齐
+	# 是否停牌的判断
+	def isStop(self):
+		return self.todayStart == 0 or self.yesterdayEnd == 0
+
+	# 处理出对齐的名称（字符宽度为8个字母宽）
+	def formattedName():
 		asciiCount = len(asciiPattern.findall(self.name))
 		nameWidth = (len(self.name) - asciiCount) / 3 * 2 + asciiCount
-		nameStr = ' ' * (8 - nameWidth) + self.name
+		return ' ' * (8 - nameWidth) + self.name
+
+	# 打印股票数据
+	def printStockData(self):
 		# 停牌处理
-		if self.todayStart == 0 or self.yesterdayEnd == 0:
-			print('%s:   停牌' % (nameStr))
+		if self.isStop():
+			print('%s:   停牌' % (self.formattedName()))
 			return
 		# 计算现价显示的小数点位数
 		if self.current < 10:
@@ -77,11 +86,12 @@ class Stock:
 		else:
 			buyPercentStr = colored('-' * int(self.buyPercent * -5.99), 'green')
 		# 打印结果
-		print('%s: %s %s %s %s %s' % (nameStr, priceStr, increaseStr, swingRangeStr, swingPercentStr, buyPercentStr))
+		print('%s: %s %s %s %s %s' % (self.formattedName(), priceStr, increaseStr, swingRangeStr, swingPercentStr, buyPercentStr))
 
+# 换手数据Class
 class Trans:
-	def __init__(self, time = '00:00', volume = '0', price = '0', type = 'EQUAL'):
-		self.time = int(time[0:2] + time[3:5])
+	def __init__(self, time = '00:00:00', volume = '0', price = '0', type = 'EQUAL'):
+		self.time = int(time.replace(':', '')[0:4])
 		self.volume = int(volume)
 		self.price = float(price)
 		if type == 'DOWN':
@@ -91,16 +101,7 @@ class Trans:
 		else:
 			self.type = 0
 
-	def loadLine(self, line):
-		params = line.split('\t')
-		self.time = int(params[0])
-		self.volume = int(params[1])
-		self.price = float(params[2])
-		self.type = int(params[3])
-
-	def saveLine(self):
-		return '%d\t%d\t%.2f\t%d\n' % (self.time, self.volume, self.price, self.type)
-
+# K线数据Class
 class Kline:
 	def __init__(self, start, highest, lowest, end, volume, dateTime = '1970-01-01 00:00:00'):
 		params = dateTime.split(' ')

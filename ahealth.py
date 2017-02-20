@@ -11,7 +11,7 @@ from termcolor import colored
 threadLock = threading.Lock()
 stockPattern = re.compile(r'var hq_str_s[hz]\d{6}="([^,"]+),([^,"]+),([^,"]+),([^,"]+),[^"]+";')
 distributionCount = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # 20个对应的分布数量
-distributionMaximum = 0
+distributionMaximum = 0 # 分布数量中最大的数量
 totalIncrease = 0.0
 totalCount = 0
 
