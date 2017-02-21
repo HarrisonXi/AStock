@@ -35,7 +35,7 @@ class Stock:
 		return self.todayStart == 0 or self.yesterdayEnd == 0
 
 	# 处理出对齐的名称（字符宽度为8个字母宽）
-	def formattedName():
+	def formattedName(self):
 		asciiCount = len(asciiPattern.findall(self.name))
 		nameWidth = (len(self.name) - asciiCount) / 3 * 2 + asciiCount
 		return ' ' * (8 - nameWidth) + self.name
