@@ -28,7 +28,7 @@ class Stock:
 		if buyVolume == 0 and sellVolume == 0:
 			self.buyPercent = 0.0
 		else:
-			self.buyPercent = 2.0 * buyVolume / (buyVolume + sellVolume) - 1.0;
+			self.buyPercent = 2.0 * buyVolume / (buyVolume + sellVolume) - 1.0
 
 	# 是否停牌的判断
 	def isStop(self):
