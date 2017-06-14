@@ -87,7 +87,7 @@ def requestKlineData_(stockCode, count, scale):
 	while match:
 		kline = Kline(match.group(2), match.group(3), match.group(4), match.group(5), match.group(6), match.group(1))
 		klineList.append(kline)
-		match = klinePattern.search(content, match.end() + 1)
+		match = klinePattern.search(content, match.end())
 	return klineList
 
 def requestKlineData(stockCode, count, scale = 240):

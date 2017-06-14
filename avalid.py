@@ -25,7 +25,7 @@ def filterStockList(stockList):
 	match = validPattern.search(content)
 	while match:
 		validStockList.append(match.group(1))
-		match = validPattern.search(content, match.end() + 1)
+		match = validPattern.search(content, match.end())
 	threadLock.release()
 	return True
 

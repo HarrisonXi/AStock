@@ -71,7 +71,7 @@ def requestStockData():
 		stock = Stock(match.group(1), match.group(2), match.group(3), match.group(4), match.group(5), match.group(6))
 		stock.calcBuyPercent([match.group(7), match.group(8), match.group(9), match.group(10), match.group(11), match.group(12), match.group(13), match.group(14), match.group(15), match.group(16)])
 		lastData.append(stock)
-		match = stockPattern.search(content, match.end() + 1)
+		match = stockPattern.search(content, match.end())
 	if len(lastData) == 0:
 		return ResultUnknown
 	return ResultSuccess

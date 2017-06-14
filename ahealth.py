@@ -39,7 +39,7 @@ def devideStockList(stockList):
 				increase = -9.99
 			increase = int(10 - increase)
 			distributionCount[increase] = distributionCount[increase] + 1
-		match = stockPattern.search(content, match.end() + 1)
+		match = stockPattern.search(content, match.end())
 	threadLock.release()
 	return True
 
