@@ -10,8 +10,8 @@ threadLock = threading.Lock()
 validPattern = re.compile(r'var hq_str_(s[hz]\d{6})="[^,"]+,[^,"]+,[^,"]+,[^,"]+,[^"]+";')
 # 确认存在的3个特殊股票代码
 validStockList = ['sz001696','sz001896','sz001979']
-# 2017年4月1日及之后才上市的股票代码
-newStockList = ['sz002859','sz002860','sz002861','sz002862','sz002863','sz002865','sz002866','sz002867','sz002868','sz002869','sz002870','sz002871','sz002872','sz002873','sh601366','sh601952','sh603050','sh603078','sh603081','sh603086','sh603096','sh603113','sh603139','sh603180','sh603197','sh603225','sh603229','sh603232','sh603269','sh603320','sh603383','sh603385','sh603488','sh603501','sh603505','sh603538','sh603586','sh603680','sh603728','sh603758','sh603767','sh603787','sh603797','sh603803','sh603826','sh603855','sh603896','sh603906','sh603920','sh603926','sh603985']
+# 2017年11月1日及之后才上市的股票代码
+newStockList = ['sz002864','sz002911','sz002912','sz002913','sz002915','sz002916','sz002917','sz002918','sz002919','sz002920','sh600025','sh600903','sh600933','sh601019','sh603076','sh603083','sh603161','sh603278','sh603283','sh603302','sh603365','sh603477','sh603507','sh603605','sh603659','sh603661','sh603685','sh603711','sh603809','sh603848','sh603856','sh603890','sh603912','sh603916','sh603917','sh603937','sh603970']
 
 def filterStockList(stockList):
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
@@ -43,7 +43,7 @@ threadList = []
 for index in xrange(1, 1000, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
-for index in xrange(2001, 2874, 100):
+for index in xrange(2001, 2920, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
 for index in xrange(600000, 602000, 100):
