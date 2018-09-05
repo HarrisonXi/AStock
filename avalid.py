@@ -8,10 +8,10 @@ import threading
 
 threadLock = threading.Lock()
 validPattern = re.compile(r'var hq_str_(s[hz]\d{6})="[^,"]+,[^,"]+,[^,"]+,[^,"]+,[^"]+";')
-# 确认存在的3个特殊股票代码
-validStockList = ['sz001696','sz001896','sz001979']
-# 2017年11月1日及之后才上市的股票代码
-newStockList = ['sz002864','sz002911','sz002912','sz002913','sz002915','sz002916','sz002917','sz002918','sz002919','sz002920','sh600025','sh600903','sh600933','sh601019','sh603076','sh603083','sh603161','sh603278','sh603283','sh603302','sh603365','sh603477','sh603507','sh603605','sh603659','sh603661','sh603685','sh603711','sh603809','sh603848','sh603856','sh603890','sh603912','sh603916','sh603917','sh603937','sh603970']
+# 确认存在的4个特殊股票代码
+validStockList = ['sz001696','sz001896','sz001965','sz001979']
+# 2018年9月1日及之后才上市的股票代码
+newStockList = ['sz002935','sz002936','sz002937','sz002938','sh601577','sh603297','sh603583','sh603790','sh603810']
 
 def filterStockList(stockList):
 	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
@@ -43,7 +43,7 @@ threadList = []
 for index in xrange(1, 1000, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
-for index in xrange(2001, 2920, 100):
+for index in xrange(2001, 3000, 100):
 	thread = threading.Thread(target = threadFunction, args = ('sz', index, index + 100))
 	threadList.append(thread)
 for index in xrange(600000, 602000, 100):
