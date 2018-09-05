@@ -87,31 +87,3 @@ class Stock:
 			buyPercentStr = colored('-' * int(self.buyPercent * -5.99), 'green')
 		# 打印结果
 		print('%s: %s %s %s %s %s' % (self.formattedName(), priceStr, increaseStr, swingRangeStr, swingPercentStr, buyPercentStr))
-
-# 换手数据Class
-class Trans:
-	def __init__(self, time = '00:00:00', volume = '0', price = '0', type = 'EQUAL'):
-		self.time = int(time.replace(':', '')[0:4])
-		self.volume = int(volume)
-		self.price = float(price)
-		if type == 'DOWN':
-			self.type = -1
-		elif type == 'UP':
-			self.type = 1
-		else:
-			self.type = 0
-
-# K线数据Class
-class Kline:
-	def __init__(self, start, highest, lowest, end, volume, dateTime = '1970-01-01 00:00:00'):
-		params = dateTime.split(' ')
-		self.date = int(params[0].replace('-', '')[-6:])
-		if len(params) > 1:
-			self.time = int(params[1].replace(':', '')[0:4])
-		else:
-			self.time = 1500
-		self.start = float(start)
-		self.end = float(end)
-		self.highest = float(highest)
-		self.lowest = float(lowest)
-		self.volume = int(volume)
