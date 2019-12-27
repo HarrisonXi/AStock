@@ -2,34 +2,63 @@
 
 ### K线数据
 
-http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=60&ma=no&datalen=100
+https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_sh600036_60_1577432551767=/CN_MarketDataService.getKLineData?symbol=sh600036&scale=60&ma=no&datalen=1023
 
-	{day:"2015-07-02 14:00:00",open:"18.850",high:"18.950",low:"18.500",close:"18.650",volume:"71039840"}
-	{day:"2015-07-02 15:00:00",open:"18.660",high:"18.980",low:"18.010",close:"18.650",volume:"129299168"}
+	{"day":"2019-12-27 14:00:00","open":"38.350","high":"38.410","low":"37.940","close":"37.980","volume":"7457497"}
+	{"day":"2019-12-27 15:00:00","open":"37.970","high":"38.020","low":"37.800","close":"37.860","volume":"7211017"}
 
-数据：日期时间，开盘价，最高价，最低价，收盘价，交易量（股）
+请求地址和以前比变化很大，中间一段`sh600036_60_1577432551767`的三段依次是：
 
-http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=240&ma=no&datalen=100
+	股票ID
+	scale值（单位是分钟数）
+	1970时间戳（精确到毫秒的13位时间戳）
 
-	{day:"2015-07-01",open:"18.330",high:"18.660",low:"18.060",close:"18.210",volume:"293674272"}
-	{day:"2015-07-02",open:"18.810",high:"19.180",low:"17.950",close:"18.650",volume:"524774688"}
+目前不知道这个时间戳是用来避免cache的还是会用做时间校验的，初步估计不会做校验，但是有可能会当做终止时间参数
 
-值得一提的是改成scale=240就变成日K了，scale=1200变成周K，分钟级别的还支持5、15和30分钟 
+item的数据依次为：
 
-http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/CN_MarketData.getKLineData?symbol=sh600036&scale=240&datalen=100
+	时间
+	开盘价
+	最高价
+	最低价
+	收盘价
+	成交量（股）
 
-	{day:"2015-07-01",open:"18.330",high:"18.660",low:"18.060",close:"18.210",volume:"293674272",ma_price5:18.04,ma_volume5:395533120,ma_price10:18.422,ma_volume10:325295078,ma_price30:19.072,ma_volume30:315460913}
-	{day:"2015-07-02",open:"18.810",high:"19.180",low:"17.950",close:"18.650",volume:"524774688",ma_price5:18.082,ma_volume5:435026694,ma_price10:18.344,ma_volume10:352498610,ma_price30:19.092,ma_volume30:321150727}
+https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_sh600036_240_1577432551767=/CN_MarketDataService.getKLineData?symbol=sh600036&scale=240&ma=no&datalen=1023
 
-然后去掉ma=no参数还可以获得5、10和30日均价均值
+	{"day":"2019-12-26","open":"37.780","high":"38.100","low":"37.690","close":"38.100","volume":"19223976"}
+	{"day":"2019-12-27","open":"38.100","high":"38.500","low":"37.800","close":"37.860","volume":"35953534"}
+
+值得一提的是改成`scale=240`就变成日K了，`scale=1200`变成周K，分钟级别的还支持`scale=5`、`15`和`30`
+
+https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_sh600036_240_1577432551767=/CN_MarketDataService.getKLineData?symbol=sh600036&scale=240&datalen=1023
+
+	{"day":"2019-12-26","open":"37.780","high":"38.100","low":"37.690","close":"38.100","volume":"19223976","ma_price5":37.768,"ma_volume5":28317561,"ma_price10":37.688,"ma_volume10":38300448,"ma_price30":36.89,"ma_volume30":33513730}
+	{"day":"2019-12-27","open":"38.100","high":"38.500","low":"37.800","close":"37.860","volume":"35953534","ma_price5":37.832,"ma_volume5":29748118,"ma_price10":37.724,"ma_volume10":35346242,"ma_price30":36.924,"ma_volume30":33662152}
+
+然后去掉`ma=no`参数还可以获得5、10和30日均价均成交量
 
 ### 复权数据
 
-关于复权数据，以龙力生物2015年6月5日复权为例，当日该股下跌2.26%
+关于复权数据，以青山纸业2019年6月3日复权为例，当日该股上涨4.77%，对应日K数据：
 
-http://finance.sina.com.cn/realstock/newcompany/sz002604/phfq.js
+	{"day":"2019-05-31","open":"3.020","high":"3.060","low":"3.010","close":"3.040","volume":"6923750"}
+	{"day":"2019-06-03","open":"2.350","high":"2.570","low":"2.340","close":"2.450","volume":"16269606"}
 
-	_2015_06_05:"52.5870",
-	_2015_06_04:"53.8027",
+前复权接口：https://finance.sina.com.cn/realstock/company/sz002604/qfq.js
 
-52.5870 / 53.8027 = 0.9774，和下跌2.26%一致
+	{"d":"2019-06-03", "f":"1.0000000000000000"}
+	{"d":"2007-01-18", "f":"1.3000000000000000"}
+
+用收盘价进行计算，`(2.450 / 1.0) / (3.040 / 1.3) = 1.0476973684210527`，的确是上涨了4.7697%
+
+这个接口只列出了除权日的数据，相对于原来的接口来说算涨幅麻烦了，但是可以更快速的发现哪些日子进行了除权
+
+后复权接口：https://finance.sina.com.cn/realstock/company/sz002604/hfq.js
+
+	{"d":"2019-06-03", "f":"5.3605079538479000"}
+	{"d":"2007-01-18", "f":"4.1234676568061000"}
+
+`5.3605079538479000 / 4.1234676568061000 = 1.3`，和前复权的比例一致，就是计算的时候要注意下是颠倒的
+
+`(2.450 * 5.3605079538479000) / (3.040 * 4.1234676568061000) = 1.0476973684210469`
