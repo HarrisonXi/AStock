@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-import urllib2
-import socket
+import requests
 import os, sys
 import re
 import time
@@ -16,12 +15,10 @@ totalIncrease = 0.0
 totalCount = 0
 
 def devideStockList(stockList):
-	url = 'http://hq.sinajs.cn/list=' + ','.join(stockList)
+	url = 'https://hq.sinajs.cn/list=' + ','.join(stockList)
 	try:
-		content = urllib2.urlopen(url, timeout = 3).read()
-	except urllib2.URLError:
-		return False
-	except socket.timeout:
+		content = requests.get(url, timeout = 3).text
+	except requests.exceptions.RequestException:
 		return False
 	global totalIncrease
 	global totalCount
@@ -33,10 +30,10 @@ def devideStockList(stockList):
 			increase = (stock.current - stock.yesterdayEnd) / stock.yesterdayEnd * 100
 			totalIncrease += increase
 			totalCount += 1
-			if increase > 9.99:
-				increase = 9.99
-			elif increase < -9.99:
-				increase = -9.99
+			if increase > 9.999:
+				increase = 9.999
+			elif increase < -9.999:
+				increase = -9.999
 			increase = int(10 - increase)
 			distributionCount[increase] = distributionCount[increase] + 1
 		match = stockPattern.search(content, match.end())
@@ -55,10 +52,10 @@ if (os.path.isfile(os.path.join(sys.path[0], 'stock.list')) != True):
 validStockFile = open(os.path.join(sys.path[0], 'stock.list'), 'r')
 validStockList = validStockFile.read().split('\n')
 validStockFile.close()
-countPerThread = (len(validStockList) + 99) / 100
-threadCount = (len(validStockList) + countPerThread - 1) / countPerThread
+countPerThread = 100
+threadCount = (len(validStockList) + countPerThread - 1) // countPerThread
 threadList = []
-for index in xrange(0, threadCount):
+for index in range(0, threadCount):
 	thread = threading.Thread(target = threadFunction, args = (validStockList[index * countPerThread:(index + 1) * countPerThread],))
 	threadList.append(thread)
 for thread in threadList:
@@ -66,18 +63,18 @@ for thread in threadList:
 for thread in threadList:
 	thread.join()
 print('涨幅分布:')
-for increase in xrange(0, 20):
+for increase in range(0, 20):
 	if distributionMaximum < distributionCount[increase]:
 		distributionMaximum = distributionCount[increase]
-for increase in xrange(0, 20):
-	distributionStr = '%4d %s' % (distributionCount[increase], '*' * (distributionCount[increase] * 70 / distributionMaximum))
+for increase in range(0, 20):
+	distributionStr = '{:4d} {}'.format(distributionCount[increase], '*' * (distributionCount[increase] * 70 // distributionMaximum))
 	if increase < 8:
 		distributionStr = colored(distributionStr, 'red')
 	elif increase > 11:
 		distributionStr = colored(distributionStr, 'green')
 	print(distributionStr)
-print('平均涨幅: %.2f%%') % (totalIncrease / totalCount)
-print('开盘数量: %d') % (totalCount)
+print('平均涨幅: {:.2f}%'.format(totalIncrease / totalCount))
+print('开盘数量: {}'.format(totalCount))
 localTime = time.localtime(startTime)
-print('运行时间: %02d:%02d:%02d' % (localTime.tm_hour, localTime.tm_min, localTime.tm_sec))
-print('总 用 时: %.2f秒' % (time.time() - startTime))
+print('运行时间: {:02d}:{:02d}:{:02d}'.format(localTime.tm_hour, localTime.tm_min, localTime.tm_sec))
+print('总 用 时: {:.2f}秒'.format(time.time() - startTime))

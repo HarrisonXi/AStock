@@ -2,12 +2,12 @@
 import re
 from termcolor import colored
 
-asciiPattern = re.compile(r'[A-Z* ]')
+asciiPattern = re.compile(r'[A-Z0-9* ]')
 
 # 实时数据Class
 class Stock:
 	def __init__(self, name, todayStart, yesterdayEnd, current, highest = '0', lowest = '0'):
-		self.name = name.decode('gbk').encode('utf-8')
+		self.name = name
 		self.todayStart = float(todayStart)
 		self.yesterdayEnd = float(yesterdayEnd)
 		self.current = float(current)
@@ -36,30 +36,30 @@ class Stock:
 
 	# 处理出对齐的名称（字符宽度为8个字母宽）
 	def formattedName(self):
-		asciiCount = len(asciiPattern.findall(self.name))
-		nameWidth = (len(self.name) - asciiCount) / 3 * 2 + asciiCount
-		return ' ' * (8 - nameWidth) + self.name
+	    asciiCount = len(asciiPattern.findall(self.name))
+	    nameWidth = (len(self.name) - asciiCount) * 2 + asciiCount
+	    return ' ' * (8 - nameWidth) + self.name
 
 	# 打印股票数据
 	def printStockData(self):
 		# 停牌处理
 		if self.isStop():
-			print('%s:   停牌' % (self.formattedName()))
+			print('{}:   停牌'.format(self.formattedName()))
 			return
 		# 计算现价显示的小数点位数
 		if self.current < 10:
-			priceStr = '%6.3f' % self.current
+			priceStr = '{:6.3f}'.format(self.current)
 		elif self.current < 100:
-			priceStr = '%6.2f' % self.current
+			priceStr = '{:6.2f}'.format(self.current)
 		elif self.current < 1000:
-			priceStr = '%6.1f' % self.current
+			priceStr = '{:6.1f}'.format(self.current)
 		else:
-			priceStr = '%6.0f' % self.current
+			priceStr = '{:6.0f}'.format(self.current)
 		# 计算今日的涨跌幅
 		if self.current == self.yesterdayEnd:
 			increaseStr = '  0.00%'
 		else:
-			increaseStr = '%+6.2f%%' % ((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
+			increaseStr = '{:+6.2f}%'.format((self.current - self.yesterdayEnd) / self.yesterdayEnd * 100)
 			if self.current < self.yesterdayEnd:
 				increaseStr = colored(increaseStr, 'green')
 			else:
@@ -77,8 +77,8 @@ class Stock:
 				else:
 					swingPercentStr = ' 50'
 			else:
-				swingRangeStr = '%5.2f%%' % ((self.highest - self.lowest) / self.yesterdayEnd * 100)
-				swingPercentStr = '%3.0f' % ((self.current - self.lowest) / (self.highest - self.lowest) * 100)
+				swingRangeStr = '{:5.2f}%'.format((self.highest - self.lowest) / self.yesterdayEnd * 100)
+				swingPercentStr = '{:3.0f}'.format((self.current - self.lowest) / (self.highest - self.lowest) * 100)
 		# 根据买卖盘委比给百分比数据加标记
 		buyPercentStr = ''
 		if self.buyPercent >= 0:
@@ -86,4 +86,4 @@ class Stock:
 		else:
 			buyPercentStr = colored('-' * int(self.buyPercent * -5.99), 'green')
 		# 打印结果
-		print('%s: %s %s %s %s %s' % (self.formattedName(), priceStr, increaseStr, swingRangeStr, swingPercentStr, buyPercentStr))
+		print('{}: {} {} {} {} {}'.format(self.formattedName(), priceStr, increaseStr, swingRangeStr, swingPercentStr, buyPercentStr))

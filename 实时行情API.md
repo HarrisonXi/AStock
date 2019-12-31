@@ -45,7 +45,7 @@ https://hq.sinajs.cn/list=sz000001
 
 注意：部分股票末尾最后一个数据后面有逗号，部分股票末尾没有
 
-支持多个查询目标用逗号隔开一起查询，例如：http://hq.sinajs.cn/list=sh000001,sh600036
+支持多个查询目标用逗号隔开一起查询，例如：https://hq.sinajs.cn/list=sh000001,sh600036
 
 ### 分时数据
 
