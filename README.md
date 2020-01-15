@@ -66,7 +66,7 @@ cy: 创业板指
 
 数据来源于新浪财经，整理好的 API 文档：[实时行情API][5]、[历史数据API][6]
 
-如果有兴趣用 python 做真正的数据分析，可以去参考[TuShare开源库][2]。
+如果有兴趣用 python 做真正的数据分析，可以去参考[TuShare开源库][2]，我的[邀请链接][7]。
 
 仅在 Mac 的 python 3.7 环境下使用过，对其它平台的兼容没有测试过。
 
@@ -78,3 +78,4 @@ cy: 创业板指
 [4]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output2.png
 [5]: https://github.com/HarrisonXi/AStock/blob/master/%E5%AE%9E%E6%97%B6%E8%A1%8C%E6%83%85API.md
 [6]: https://github.com/HarrisonXi/AStock/blob/master/%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AEAPI.md
+[7]: https://tushare.pro/register?reg=344160
