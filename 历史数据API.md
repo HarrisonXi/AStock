@@ -45,7 +45,7 @@ https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_sh600036_240_1577432551767=/CN
 	{"day":"2019-05-31","open":"3.020","high":"3.060","low":"3.010","close":"3.040","volume":"6923750"}
 	{"day":"2019-06-03","open":"2.350","high":"2.570","low":"2.340","close":"2.450","volume":"16269606"}
 
-前复权接口：https://finance.sina.com.cn/realstock/company/sz002604/qfq.js
+前复权接口：https://finance.sina.com.cn/realstock/company/sh600103/qfq.js
 
 	{"d":"2019-06-03", "f":"1.0000000000000000"}
 	{"d":"2007-01-18", "f":"1.3000000000000000"}
@@ -54,7 +54,7 @@ https://quotes.sina.cn/cn/api/jsonp_v2.php/var%20_sh600036_240_1577432551767=/CN
 
 这个接口只列出了除权日的数据，相对于原来的接口来说算涨幅麻烦了，但是可以更快速的发现哪些日子进行了除权
 
-后复权接口：https://finance.sina.com.cn/realstock/company/sz002604/hfq.js
+后复权接口：https://finance.sina.com.cn/realstock/company/sh600103/hfq.js
 
 	{"d":"2019-06-03", "f":"5.3605079538479000"}
 	{"d":"2007-01-18", "f":"4.1234676568061000"}
