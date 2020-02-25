@@ -2,6 +2,10 @@
 
 A python script to monitor Chinese stocks in terminal. 一个在终端监视 A 股的 python 脚本。
 
+### 依赖
+
+依赖 [requests][3] 库，请先使用 `pip install requests` 安装依赖。
+
 ### 使用示例
 
     python astock.py sh600000 sz000001
@@ -62,15 +66,25 @@ cy: 创业板指
 
 不包含创业板股票，有需要的请自行添加股票代码至 `stock.list`。
 
+### 绘制蜡烛图
+
+蜡烛图绘制功能额外依赖 [pandas][8] 和 [numpy][9] 库，请先自行安装依赖。
+
+数据格式参考的 [TuShare 开源库][2]，可以自己看对应的 test.csv。
+
+    python acandle.py
+
+输出示例
+
+![输出示例][10]
+
 ### 其它说明
 
 数据来源于新浪财经，整理好的 API 文档：[实时行情API][5]、[历史数据API][6]
 
-如果有兴趣用 python 做真正的数据分析，可以去参考[TuShare开源库][2]，我的[邀请链接][7]。
+如果有兴趣用 python 做真正的数据分析，可以去参考 [TuShare 开源库][2]，我的[邀请链接][7]。
 
 仅在 Mac 的 python 3.7 环境下使用过，对其它平台的兼容没有测试过。
-
-依赖 [requests][3] 库，请先使用 `pip install requests` 安装依赖。
 
 [1]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output1.png
 [2]: https://github.com/waditu/tushare
@@ -79,3 +93,6 @@ cy: 创业板指
 [5]: https://github.com/HarrisonXi/AStock/blob/master/%E5%AE%9E%E6%97%B6%E8%A1%8C%E6%83%85API.md
 [6]: https://github.com/HarrisonXi/AStock/blob/master/%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AEAPI.md
 [7]: https://tushare.pro/register?reg=344160
+[8]: https://pypi.org/project/pandas/
+[9]: https://pypi.org/project/numpy/
+[10]: https://raw.githubusercontent.com/HarrisonXi/AStock/master/output3.png
